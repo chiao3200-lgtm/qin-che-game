@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>禁忌相簿：秦徹的懲罰遊戲</title>
+    <style>
+        :root {
+            --bg-color: #0a0505; /* 極深紅黑背景 */
+            --accent-color: #9c1c1c; /* 血紅色 */
+            --text-color: #e0e0e0;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: "Microsoft JhengHei", sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* 標題區 */
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            color: var(--accent-color);
+            letter-spacing: 5px;
+            font-size: 1.6rem;
+            text-shadow: 0 0 15px rgba(156, 28, 28, 0.6);
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 0.85rem;
+            color: #666;
+            letter-spacing: 2px;
+        }
+
+        /* --- 響應式相簿網格 --- */
+        .gallery {
+            display: grid;
+            /* 居中排列關鍵：auto-fit 配合 justify-content */
+            grid-template-columns: repeat(auto-fit, 140px);
+            justify-content: center;
+            gap: 20px;
+            width: 100%;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        /* 縮圖樣式：模糊 + 50% 黑 */
+        .gallery-item {
+            width: 140px;
+            aspect-ratio: 3/4;
+            background: #000;
+            overflow: hidden;
+            cursor: pointer;
+            border: 1px solid #300;
+            transition: transform 0.3s, border-color 0.3s;
+            position: relative;
+        }
+
+        .gallery-item:hover {
+            border-color: var(--accent-color);
+            transform: scale(1.05);
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            /* 初始狀態：模糊 + 50% 黑 */
+            filter: blur(6px) brightness(0.4);
+            transition: 0.5s ease;
+        }
+
+        .gallery-item:hover img {
+            filter: blur(3px) brightness(0.6);
+        }
+
+        /* --- 全螢幕燈箱 (Lightbox) --- */
+        .lightbox {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.98);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 5000;
+            user-select: none;
+        }
+
+        .lightbox img {
+            max-width: 90%;
+            max-height: 85%;
+            object-fit: contain;
+            /* 放大時完全清晰 */
+            filter: none !important;
+            box-shadow: 0 0 50px rgba(156, 28, 28, 0.3);
+            animation: imgZoom 0.3s ease-out;
+        }
+
+        @keyframes imgZoom {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* 導航按鈕 */
+        .nav-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(156, 28, 28, 0.1);
+            color: #fff;
+            border: none;
+            width: 60px;
+            height: 100px;
+            font-size: 2.5rem;
+            cursor: pointer;
+            z-index: 5100;
+            transition: 0.3s;
+        }
+
+        .nav-btn:hover { background: rgba(156, 28, 28, 0.5); }
+        .prev-btn { left: 0; border-radius: 0 10px 10px 0; }
+        .next-btn { right: 0; border-radius: 10px 0 0 10px; }
+
+        .close-btn {
+            position: absolute;
+            top: 20px; right: 20px;
+            background: none; border: none;
+            color: white; font-size: 3rem;
+            cursor: pointer; z-index: 5200;
+        }
+
+        /* 頁碼提示 */
+        .counter {
+            position: absolute;
+            bottom: 30px;
+            color: var(--accent-color);
+            font-family: serif;
+            letter-spacing: 5px;
+            font-size: 1.2rem;
+        }
+
+        /* 返回按鈕 */
+        .back-btn {
+            margin-top: 50px;
+            padding: 12px 40px;
+            background: transparent;
+            color: var(--accent-color);
+            border: 1px solid var(--accent-color);
+            text-decoration: none;
+            font-weight: bold;
+            letter-spacing: 3px;
+            transition: 0.3s;
+        }
+
+        .back-btn:hover {
+            background: var(--accent-color);
+            color: white;
+            box-shadow: 0 0 20px rgba(156, 28, 28, 0.5);
+        }
+
+        /* 手機版優化 */
+        @media (max-width: 600px) {
+            .gallery {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+                max-width: 320px;
+            }
+            .gallery-item { width: 100%; }
+            .nav-btn { width: 50px; height: 80px; font-size: 1.5rem; background: rgba(0,0,0,0.6); }
+            h1 { font-size: 1.2rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>結局 C：秦徹的懲罰遊戲</h1>
+        <div class="subtitle">「這就是敗北的代價，看清楚了...」</div>
+    </header>
+
+    <div class="gallery" id="punish-gallery">
+        <!-- 此處請更換為結局 C 專用的懲罰圖片網址 -->
+        <div class="gallery-item"><img src="https://via.placeholder.com/600x900?text=Punish_1" alt="P1"></div>
+        <div class="gallery-item"><img src="https://via.placeholder.com/600x900?text=Punish_2" alt="P2"></div>
+        <div class="gallery-item"><img src="https://via.placeholder.com/600x900?text=Punish_3" alt="P3"></div>
+        <div class="gallery-item"><img src="https://via.placeholder.com/600x900?text=Punish_4" alt="P4"></div>
+        <div class="gallery-item"><img src="https://via.placeholder.com/600x900?text=Punish_5" alt="P5"></div>
+        <div class="gallery-item"><img src="https://via.placeholder.com/600x900?text=Punish_6" alt="P6"></div>
+    </div>
+
+    <a href="index.html" class="back-btn">返回對峙</a>
+
+    <!-- 燈箱視窗 -->
+    <div id="lightbox" class="lightbox">
+        <button class="close-btn" onclick="closeLB()">&times;</button>
+        <button class="nav-btn prev-btn" onclick="moveImg(-1, event)">&#10094;</button>
+        <img id="lb-img" src="">
+        <button class="nav-btn next-btn" onclick="moveImg(1, event)">&#10095;</button>
+        <div class="counter"><span id="cur-num">1</span> / <span id="total-num">6</span></div>
+    </div>
+
+    <script>
+        const imgElements = document.querySelectorAll('.gallery-item img');
+        const images = Array.from(imgElements).map(img => img.src);
+        let curIdx = 0;
+
+        const lb = document.getElementById('lightbox');
+        const lbImg = document.getElementById('lb-img');
+        const curNum = document.getElementById('cur-num');
+        const totalNum = document.getElementById('total-num');
+
+        // 點擊縮圖開啟燈箱
+        imgElements.forEach((img, idx) => {
+            img.parentElement.onclick = () => {
+                curIdx = idx;
+                updateLB();
+                lb.style.display = 'flex';
+                totalNum.innerText = images.length;
+                document.body.style.overflow = 'hidden'; // 防止背景滾動
+            };
+        });
+
+        function updateLB() {
+            lbImg.src = images[curIdx];
+            curNum.innerText = curIdx + 1;
+        }
+
+        function closeLB() {
+            lb.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        function moveImg(step, e) {
+            e.stopPropagation();
+            curIdx = (curIdx + step + images.length) % images.length;
+            updateLB();
+        }
+
+        // 鍵盤支援
+        document.addEventListener('keydown', e => {
+            if (lb.style.display === 'flex') {
+                if (e.key === 'ArrowLeft') moveImg(-1, e);
+                if (e.key === 'ArrowRight') moveImg(1, e);
+                if (e.key === 'Escape') closeLB();
+            }
+        });
+
+        // 點擊背景關閉
+        lb.onclick = (e) => {
+            if (e.target === lb) closeLB();
+        };
+    </script>
+</body>
+</html>
