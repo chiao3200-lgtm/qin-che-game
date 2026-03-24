@@ -267,3 +267,146 @@
             const state = qinAssets[stateKey];
             const imgEl = document.getElementById('qin-img');
             const bubbleEl = document.getElementById('qin-bubble');
+            
+            imgEl.style.opacity = 0; // 淡出效果
+            setTimeout(() => {
+                imgEl.src = state.img;
+                bubbleEl.innerText = state.msg;
+                imgEl.style.opacity = 1; // 淡入
+            }, 300);
+        }
+
+        function startGame() {
+            const inputName = document.getElementById('user-name-input').value.trim();
+            if (inputName) playerName = inputName;
+            document.getElementById('p1-badge').innerText = playerName;
+            document.getElementById('start-screen').classList.add('hidden');
+            isLock = false;
+            updateQinState("idle");
+            initBoard();
+        }
+
+        function initBoard() {
+            cardsArray.sort(() => Math.random() - 0.5);
+            targetItem = itemNames[Math.floor(Math.random() * itemNames.length)];
+            document.getElementById('target-label').innerText = targetItem;
+            document.getElementById('target-img').src = itemConfig[targetItem];
+
+            const grid = document.getElementById('grid');
+            grid.innerHTML = '';
+            cardsArray.forEach((name, index) => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.dataset.name = name;
+                card.dataset.index = index;
+                card.innerHTML = `
+                    <div class="card-face card-back"></div>
+                    <div class="card-face card-front"><img src="${itemConfig[name]}"></div>
+                `;
+                card.addEventListener('click', () => {
+                    if (currentPlayer === 1 && !isLock && !card.classList.contains('flipped')) {
+                        handleFlip(card);
+                    }
+                });
+                grid.appendChild(card);
+            });
+        }
+
+        function handleFlip(card) {
+            card.classList.add('flipped');
+            flippedCards.push(card);
+            aiMemory[card.dataset.index] = card.dataset.name;
+            if (flippedCards.length === 2) checkMatch();
+        }
+
+        function checkMatch() {
+            isLock = true;
+            const [c1, c2] = flippedCards;
+            const isMatch = (c1.dataset.name === c2.dataset.name);
+
+            if (isMatch) {
+                if (c1.dataset.name === targetItem) {
+                    setTimeout(() => showEnding(currentPlayer), 600);
+                    return;
+                }
+                // 配對成功非目標
+                if(currentPlayer === 2) updateQinState("success");
+                setTimeout(switchTurn, 1000);
+            } else {
+                // 配對失敗
+                if(currentPlayer === 2) updateQinState("fail");
+                setTimeout(() => {
+                    c1.classList.remove('flipped');
+                    c2.classList.remove('flipped');
+                    switchTurn();
+                }, 1000);
+            }
+        }
+
+        function switchTurn() {
+            flippedCards = [];
+            currentPlayer = (currentPlayer === 1) ? 2 : 1;
+            isLock = (currentPlayer === 2);
+
+            document.getElementById('p1-badge').classList.toggle('active', currentPlayer === 1);
+            document.getElementById('qin-badge').classList.toggle('active', currentPlayer === 2);
+
+            if (currentPlayer === 2) {
+                updateQinState("thinking");
+                setTimeout(aiMove, 1500);
+            } else {
+                updateQinState("idle");
+            }
+        }
+
+        function aiMove() {
+            const allCards = [...document.querySelectorAll('.card')];
+            const availableIndexes = allCards
+                .filter(c => !c.classList.contains('flipped'))
+                .map(c => parseInt(c.dataset.index));
+
+            if (availableIndexes.length === 0) return;
+
+            const targetsInMem = Object.keys(aiMemory).filter(idx => 
+                aiMemory[idx] === targetItem && availableIndexes.includes(parseInt(idx))
+            );
+
+            let p1Idx, p2Idx;
+            if (targetsInMem.length >= 2) {
+                p1Idx = targetsInMem[0]; p2Idx = targetsInMem[1];
+            } else {
+                p1Idx = availableIndexes[Math.floor(Math.random() * availableIndexes.length)];
+                // 為了流暢性，先翻一張
+                handleFlip(allCards[p1Idx]);
+                setTimeout(() => {
+                    const matchIdx = Object.keys(aiMemory).find(idx => 
+                        aiMemory[idx] === allCards[p1Idx].dataset.name && idx != p1Idx && availableIndexes.includes(parseInt(idx))
+                    );
+                    p2Idx = matchIdx || availableIndexes.filter(i => i != p1Idx)[Math.floor(Math.random() * (availableIndexes.length - 1))];
+                    handleFlip(allCards[p2Idx]);
+                }, 800);
+                return;
+            }
+            handleFlip(allCards[p1Idx]);
+            setTimeout(() => handleFlip(allCards[p2Idx]), 800);
+        }
+
+        function showEnding(winner) {
+            const modal = document.getElementById('end-modal');
+            const title = document.getElementById('end-title');
+            const desc = document.getElementById('end-desc');
+            modal.classList.remove('hidden');
+
+            if (winner === 1) {
+                updateQinState("lose");
+                title.innerText = "結局 A：贏得的籌碼";
+                desc.innerText = `在緊張的博弈中，${playerName} 搶先翻開了「${targetItem}」。\n\n秦徹並不顯得懊惱，反而饒有興致地看著你：「不錯的記憶力，這份『獎勵』暫時歸你了。不過...博弈還長著呢。」`;
+            } else {
+                updateQinState("win");
+                title.innerText = "結局 B：掌控之中";
+                desc.innerText = `秦徹不疾不徐地翻開了兩張「${targetItem}」。\n\n「太慢了，${playerName}。」他低沉的聲音響起，「這件東西我就收下了。至於你，還需要更多的練習...或者，直接求我也可以。」`;
+            }
+        }
+    </script>
+</body>
+</html>
