@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>回憶相簿：秦徹</title>
+    <style>
+        :root {
+            --accent: #ff4d4d;
+            --bg: #050508;
+        }
+        body { background: var(--bg); color: #fff; font-family: sans-serif; margin: 0; padding: 20px; text-align: center; }
+        h1 { color: var(--accent); letter-spacing: 2px; margin-bottom: 30px; font-size: 1.5rem; }
+        
+        /* 響應式相簿網格 */
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 15px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        /* 縮圖樣式：模糊 5px + 50% 黑 (brightness 0.5) */
+        .gallery-item {
+            position: relative;
+            aspect-ratio: 3/4;
+            background: #000;
+            overflow: hidden;
+            cursor: pointer;
+            border: 1px solid #222;
+        }
+        .gallery-item img {
+            width: 100%; height: 100%;
+            object-fit: cover;
+            filter: blur(5px) brightness(0.5); /* 模糊 5px + 50% 黑 */
+            transition: 0.3s ease;
+        }
+        .gallery-item:hover img { filter: blur(2px) brightness(0.7); }
+
+        /* --- 全螢幕放大燈箱 (Lightbox) --- */
+        .lightbox {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.98);
+            display: none; /* 預設隱藏 */
+            justify-content: center;
+            align-items: center;
+            z-index: 3000;
+        }
+        .lightbox img {
+            max-width: 90%; max-height: 85%;
+            object-fit: contain;
+            filter: none !important; /* 放大時完全清晰 */
+            box-shadow: 0 0 40px rgba(0,0,0,1);
+            animation: fadeIn 0.3s;
+        }
+
+        /* 左右切換按鈕 */
+        .nav-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: none;
+            width: 50px; height: 80px;
+            font-size: 2rem;
+            cursor: pointer;
+            z-index: 3100;
+            transition: 0.3s;
+        }
+        .nav-btn:hover { background: rgba(255, 77, 77, 0.5); }
+        .prev-btn { left: 0; border-radius: 0 8px 8px 0; }
+        .next-btn { right: 0; border-radius: 8px 0 0 8px; }
+
+        /* 關閉按鈕 */
+        .close-btn {
+            position: absolute;
+            top: 20px; right: 20px;
+            background: none; border: none;
+            color: white; font-size: 2.5rem;
+            cursor: pointer; z-index: 3200;
+        }
+
+        /* 底部導航提示 */
+        .nav-info {
+            position: absolute;
+            bottom: 20px;
+            color: #888;
+            font-size: 0.9rem;
+        }
+
+        .back-btn { display: inline-block; margin-top: 40px; padding: 12px 30px; background: var(--accent); color: #fff; text-decoration: none; font-weight: bold; border-radius: 4px; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+
+        /* 手機板優化：加大按鈕觸控範圍 */
+        @media (max-width: 600px) {
+            .nav-btn { width: 60px; height: 100px; background: rgba(0,0,0,0.3); }
+            .gallery { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>回憶相簿</h1>
+
+    <div class="gallery" id="image-gallery">
+        <!-- 圖片區：此處請填寫你的實際圖片網址 -->
+        <div class="gallery-item"><img src="https://via.placeholder.com/600x900?text=Qin_1" alt="1"></div>
+        <div class="gallery-item"><img src="https://via.placeholder.com/600x900?text=Qin_2" alt="2"></div>
+        <div class="gallery-item"><img src="https://via.placeholder.com/600x900?text=Qin_3" alt="3"></div>
+        <div class="gallery-item"><img src="https://via.placeholder.com/600x900?text=Qin_4" alt="4"></div>
+        <div class="gallery-item"><img src="https://via.placeholder.com/600x900?text=Qin_5" alt="5"></div>
+        <div class="gallery-item"><img src="https://via.placeholder.com/600x900?text=Qin_6" alt="6"></div>
+    </div>
+
+    <a href="index.html" class="back-btn">返回對決</a>
+
+    <!-- 燈箱結構 -->
+    <div id="lightbox" class="lightbox">
+        <button class="close-btn" onclick="closeLightbox()">&times;</button>
+        <button class="nav-btn prev-btn" onclick="prevImage(event)">&#10094;</button>
+        <img id="lightbox-img" src="">
+        <button class="nav-btn next-btn" onclick="nextImage(event)">&#10095;</button>
+        <div class="nav-info"><span id="current-idx">1</span> / <span id="total-idx">6</span></div>
+    </div>
+
+    <script>
+        const galleryItems = document.querySelectorAll('.gallery-item img');
+        const images = Array.from(galleryItems).map(img => img.src);
+        let currentIndex = 0;
+
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImg = document.getElementById('lightbox-img');
+        const currentLabel = document.getElementById('current-idx');
+        const totalLabel = document.getElementById('total-idx');
+
+        // 初始化：點擊圖片開啟
+        galleryItems.forEach((img, index) => {
+            img.parentElement.onclick = () => openLightbox(index);
+        });
+
+        function openLightbox(index) {
+            currentIndex = index;
+            updateLightbox();
+            lightbox.style.display = 'flex';
+            totalLabel.innerText = images.length;
+        }
+
+        function updateLightbox() {
+            lightboxImg.src = images[currentIndex];
+            currentLabel.innerText = currentIndex + 1;
+        }
+
+        function closeLightbox() {
+            lightbox.style.display = 'none';
+        }
+
+        function nextImage(event) {
+            event.stopPropagation(); // 防止點擊按鈕時觸發背景關閉
+            currentIndex = (currentIndex + 1) % images.length;
+            updateLightbox();
+        }
+
+        function prevImage(event) {
+            event.stopPropagation();
+            currentIndex = (currentIndex - 1 + images.length) % images.length;
+            updateLightbox();
+        }
+
+        // 支援鍵盤左右鍵
+        document.addEventListener('keydown', (e) => {
+            if (lightbox.style.display === 'flex') {
+                if (e.key === 'ArrowRight') nextImage(e);
+                if (e.key === 'ArrowLeft') prevImage(e);
+                if (e.key === 'Escape') closeLightbox();
+            }
+        });
+
+        // 點擊圖片以外的地方關閉
+        lightbox.onclick = (e) => {
+            if (e.target === lightbox) closeLightbox();
+        };
+    </script>
+</body>
+</html>

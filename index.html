@@ -2,9 +2,8 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <!-- 重要：防止手機版誤觸縮放 -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>記憶對戰：秦徹的博弈</title>
+    <title>記憶對決：與秦徹的博弈</title>
     <style>
         :root {
             --bg-color: #050508;
@@ -14,256 +13,71 @@
             --accent: #ffd32a;
             --text: #ffffff;
         }
-
-        * {
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent; /* 移除行動裝置點擊陰影 */
-            user-select: none; /* 防止長按選取文字 */
-        }
-
-        body {
-            background-color: var(--bg-color);
-            color: var(--text);
-            font-family: "Microsoft JhengHei", sans-serif;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            overflow-x: hidden;
-            overscroll-behavior: none; /* 防止下拉重新整理 */
-        }
-
-        /* --- 主佈局：預設電腦與 iPad 橫屏 --- */
-        .main-container {
-            display: flex;
-            flex-direction: row; /* 左右並排 */
-            gap: 20px;
-            align-items: center;
-            width: 95%;
-            max-width: 1000px;
-            padding: 10px;
-            transition: all 0.5s;
-        }
-
-        /* --- 手機版佈局 (螢幕寬度小於 768px) --- */
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { background-color: var(--bg-color); color: var(--text); font-family: "Microsoft JhengHei", sans-serif; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow-x: hidden; }
+        .main-container { display: flex; flex-direction: row; gap: 30px; align-items: center; width: 95%; max-width: 1000px; padding: 10px; }
+        
         @media (max-width: 768px) {
-            .main-container {
-                flex-direction: column; /* 改為上下堆疊 */
-                gap: 10px;
-                padding-top: 20px;
-            }
-            .qin-section {
-                width: 100% !important;
-                flex-direction: row !important; /* 秦徹與對話框並排 */
-                height: 120px;
-            }
-            .qin-portrait-frame {
-                width: 80px !important;
-                height: 120px !important;
-            }
-            .qin-dialogue {
-                flex: 1;
-                margin-top: 0 !important;
-                height: 100px;
-                font-size: 0.85rem !important;
-            }
-            .grid {
-                grid-template-columns: repeat(4, 75px) !important; /* 縮小牌組 */
-                grid-template-rows: repeat(3, 100px) !important;
-                gap: 8px !important;
-            }
+            .main-container { flex-direction: column; }
+            .qin-section { width: 100% !important; flex-direction: row !important; height: 120px; }
+            .qin-portrait-frame { width: 80px !important; height: 120px !important; }
+            .grid { grid-template-columns: repeat(4, 75px) !important; grid-template-rows: repeat(3, 100px) !important; gap: 8px !important; }
         }
 
-        /* --- 左側/上方：秦徹區域 --- */
-        .qin-section {
-            width: 280px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            flex-shrink: 0;
-        }
+        .qin-section { width: 280px; display: flex; flex-direction: column; align-items: center; flex-shrink: 0; }
+        .qin-portrait-frame { width: 260px; height: 380px; background: linear-gradient(180deg, transparent, rgba(255, 77, 77, 0.1)); border-bottom: 3px solid var(--qin-color); overflow: hidden; display: flex; justify-content: center; align-items: flex-end; }
+        .qin-image { width: 100%; height: 100%; object-fit: contain; transition: opacity 0.4s; }
+        .qin-dialogue { margin-top: 10px; background: rgba(255, 255, 255, 0.03); border-left: 4px solid var(--qin-color); padding: 12px; width: 100%; min-height: 50px; font-size: 0.9rem; position: relative; }
+        .qin-name-tag { position: absolute; top: -10px; left: 10px; background: var(--qin-color); padding: 1px 6px; font-size: 0.65rem; }
 
-        .qin-portrait-frame {
-            width: 260px;
-            height: 380px;
-            background: linear-gradient(180deg, transparent, rgba(255, 77, 77, 0.1));
-            border-bottom: 3px solid var(--qin-color);
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: flex-end;
-        }
-
-        .qin-image {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            transition: opacity 0.4s ease-in-out;
-        }
-
-        .qin-dialogue {
-            margin-top: 10px;
-            background: rgba(255, 255, 255, 0.03);
-            border-left: 4px solid var(--qin-color);
-            padding: 12px;
-            width: 100%;
-            min-height: 50px;
-            font-size: 0.95rem;
-            color: #ccc;
-            line-height: 1.4;
-            position: relative;
-        }
-
-        .qin-name-tag {
-            position: absolute;
-            top: -10px; left: 10px;
-            background: var(--qin-color);
-            padding: 1px 6px;
-            font-size: 0.65rem;
-            font-weight: bold;
-        }
-
-        /* --- 右側/下方：遊戲區域 --- */
-        .game-section {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 100%;
-        }
-
-        .status-bar {
-            width: 100%;
-            max-width: 400px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-
-        .player-badge {
-            font-size: 0.8rem;
-            padding: 5px 10px;
-            border-radius: 4px;
-            opacity: 0.2;
-            transition: 0.4s;
-        }
+        .game-section { flex: 1; display: flex; flex-direction: column; align-items: center; width: 100%; }
+        .status-bar { width: 100%; max-width: 400px; display: flex; justify-content: space-between; margin-bottom: 15px; }
+        .player-badge { font-size: 0.8rem; padding: 5px 10px; opacity: 0.2; }
         .player-badge.active { opacity: 1; background: rgba(255,255,255,0.1); outline: 1px solid white; }
+        .target-card { background: #000; border: 2px solid var(--accent); padding: 8px; border-radius: 8px; text-align: center; }
 
-        .target-card {
-            background: #000;
-            border: 2px solid var(--accent);
-            padding: 8px;
-            text-align: center;
-            border-radius: 8px;
-        }
-
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(4, 85px);
-            grid-template-rows: repeat(3, 115px);
-            gap: 12px;
-            perspective: 1000px;
-        }
-
-        /* --- 卡牌樣式 --- */
-        .card {
-            width: 100%; height: 100%;
-            position: relative;
-            transform-style: preserve-3d;
-            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-        }
+        .grid { display: grid; grid-template-columns: repeat(4, 85px); grid-template-rows: repeat(3, 115px); gap: 12px; perspective: 1000px; }
+        .card { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform 0.5s; cursor: pointer; }
         .card.flipped { transform: rotateY(180deg); }
-
-        .card-face {
-            position: absolute;
-            width: 100%; height: 100%;
-            backface-visibility: hidden;
-            border-radius: 4px;
-            display: flex; align-items: center; justify-content: center;
-        }
-
+        .card-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 4px; display: flex; align-items: center; justify-content: center; }
         .card-back { background: var(--card-back); border: 1px solid #333; color: #222; }
         .card-front { background: #fff; transform: rotateY(180deg); }
         .card-front img { width: 80%; height: 80%; object-fit: contain; }
 
-        /* --- 彈窗系統 --- */
-        .modal-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95);
-            display: flex; align-items: center; justify-content: center;
-            z-index: 2000;
-            padding: 20px;
-        }
-
-        .modal-window {
-            background: #111;
-            padding: 30px;
-            border-top: 4px solid var(--qin-color);
-            text-align: center;
-            width: 100%;
-            max-width: 320px;
-        }
-
-        .name-input {
-            width: 100%;
-            padding: 12px;
-            margin: 15px 0;
-            background: #222;
-            border: 1px solid #444;
-            color: white;
-            text-align: center;
-        }
-
-        .action-btn {
-            background: var(--qin-color);
-            color: white;
-            border: none;
-            padding: 12px 30px;
-            cursor: pointer;
-            font-weight: bold;
-            width: 100%;
-        }
-
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); display: flex; align-items: center; justify-content: center; z-index: 2000; padding: 20px; }
+        .modal-window { background: #111; padding: 30px; border-top: 4px solid var(--qin-color); text-align: center; width: 100%; max-width: 400px; }
+        .action-btn { background: var(--qin-color); color: white; border: none; padding: 12px; cursor: pointer; font-weight: bold; width: 100%; text-decoration: none; display: inline-block; margin-top: 10px; }
+        .gallery-btn { background: transparent; border: 1px solid var(--accent); color: var(--accent); margin-bottom: 5px; }
         .hidden { display: none !important; }
+        .name-input { width: 100%; padding: 12px; margin: 15px 0; background: #222; border: 1px solid #444; color: white; text-align: center; }
     </style>
 </head>
 <body>
 
-    <!-- 初始設定 -->
     <div id="setup-screen" class="modal-overlay">
         <div class="modal-window">
-            <h2 style="color: var(--qin-color); margin: 0;">記憶對決</h2>
+            <h2 style="color: var(--accent);">記憶對決</h2>
             <p style="color: #888; font-size: 0.8rem;">對手：秦徹</p>
             <input type="text" id="player-name-input" class="name-input" placeholder="輸入稱號" maxlength="8">
-            <button id="start-btn" class="action-btn" onclick="initGame()">進入戰局</button>
+            <button class="action-btn" onclick="initGame()">進入戰局</button>
         </div>
     </div>
 
-    <!-- 結局 -->
     <div id="end-screen" class="modal-overlay hidden">
-        <div class="modal-window" style="max-width: 350px;">
+        <div class="modal-window">
             <h2 id="end-title"></h2>
             <p id="end-desc" style="text-align: left; font-size: 0.9rem; color: #ccc; margin: 15px 0;"></p>
-            <button class="action-btn" onclick="location.reload()">重新開始</button>
+            <!-- 動態相簿連結 -->
+            <a id="album-link" href="#" class="action-btn gallery-btn">查看專屬相簿</a>
+            <button class="action-btn" onclick="location.reload()" style="background: #333;">重新開始</button>
         </div>
     </div>
 
     <div class="main-container">
-        <!-- 秦徹區 -->
         <div class="qin-section">
-            <div class="qin-portrait-frame">
-                <img id="qin-img" class="qin-image" src="" alt="秦徹">
-            </div>
-            <div class="qin-dialogue">
-                <div class="qin-name-tag">秦徹</div>
-                <span id="qin-text">載入中...</span>
-            </div>
+            <div class="qin-portrait-frame"><img id="qin-img" class="qin-image" src=""></div>
+            <div class="qin-dialogue"><div class="qin-name-tag">秦徹</div><span id="qin-text">...</span></div>
         </div>
-
-        <!-- 遊戲區 -->
         <div class="game-section">
             <div class="status-bar">
                 <div id="p1-badge" class="player-badge active" style="color: var(--p1-color);">玩家</div>
@@ -279,22 +93,13 @@
 
     <script>
         const QIN_ASSETS = {
-            "normal":   { img: "https://via.placeholder.com/300x450?text=Normal", msg: "該你了，別讓我等太久。" },
-            "thinking": { img: "https://via.placeholder.com/300x450?text=Thinking", msg: "讓我想想...隱藏在這些牌後面的，會是什麼？" },
-            "match":    { img: "https://via.placeholder.com/300x450?text=Match", msg: "這對牌我就收下了。" },
-            "fail":     { img: "https://via.placeholder.com/300x450?text=Fail", msg: "嘖，記錯了嗎？" },
-            "win":      { img: "https://via.placeholder.com/300x450?text=Win", msg: "勝負已分。看來，你還需要練習。" },
-            "lose":     { img: "https://via.placeholder.com/300x450?text=Lose", msg: "不錯。這份驚喜，我收下了。" }
+            "normal": { img: "https://via.placeholder.com/300x450?text=Qin_Normal", msg: "該你了，別讓我等太久。" },
+            "thinking": { img: "https://via.placeholder.com/300x450?text=Qin_Thinking", msg: "讓我看看，你的運氣如何？" },
+            "win": { img: "https://via.placeholder.com/300x450?text=Qin_Win", msg: "勝負已分。你還不夠成熟。" },
+            "lose": { img: "https://via.placeholder.com/300x450?text=Qin_Lose", msg: "不錯，這份驚喜我收下了。" }
         };
 
-        const CARDS_CONFIG = {
-            "薛明": "https://cdn-icons-png.flaticon.com/128/4333/4333609.png", 
-            "薛影": "https://cdn-icons-png.flaticon.com/128/4333/4333614.png",
-            "梅":   "https://cdn-icons-png.flaticon.com/128/1047/1047461.png",
-            "槍":   "https://cdn-icons-png.flaticon.com/128/5457/5457494.png",
-            "寶石": "https://cdn-icons-png.flaticon.com/128/1255/1255153.png",
-            "羽毛": "https://cdn-icons-png.flaticon.com/128/2913/2913501.png"
-        };
+        const CARDS_CONFIG = { "薛明": "https://cdn-icons-png.flaticon.com/128/4333/4333609.png", "槍": "https://cdn-icons-png.flaticon.com/128/5457/5457494.png", "寶石": "https://cdn-icons-png.flaticon.com/128/1255/1255153.png", "羽毛": "https://cdn-icons-png.flaticon.com/128/2913/2913501.png", "梅": "https://cdn-icons-png.flaticon.com/128/1047/1047461.png", "薛影": "https://cdn-icons-png.flaticon.com/128/4333/4333614.png" };
 
         let cardList = [...Object.keys(CARDS_CONFIG), ...Object.keys(CARDS_CONFIG)];
         let target = "";
@@ -305,18 +110,9 @@
         let memory = {};
 
         async function initGame() {
-            const startBtn = document.getElementById('start-btn');
             const nameInput = document.getElementById('player-name-input');
             if(nameInput.value.trim()) playerName = nameInput.value.trim();
             document.getElementById('p1-badge').innerText = playerName;
-
-            startBtn.disabled = true;
-            startBtn.innerText = "載入中...";
-
-            // 預載圖片
-            const urls = [...Object.values(QIN_ASSETS).map(a => a.img), ...Object.values(CARDS_CONFIG)];
-            await Promise.all(urls.map(url => new Promise(r => { const i = new Image(); i.src = url; i.onload = r; i.onerror = r; })));
-
             document.getElementById('setup-screen').classList.add('hidden');
             setupBoard();
             setQinState("normal");
@@ -327,11 +123,7 @@
             const data = QIN_ASSETS[stateKey];
             const img = document.getElementById('qin-img');
             img.style.opacity = 0;
-            setTimeout(() => {
-                img.src = data.img;
-                document.getElementById('qin-text').innerText = data.msg;
-                img.style.opacity = 1;
-            }, 200);
+            setTimeout(() => { img.src = data.img; document.getElementById('qin-text').innerText = data.msg; img.style.opacity = 1; }, 200);
         }
 
         function setupBoard() {
@@ -363,10 +155,8 @@
             const [c1, c2] = flippedStack;
             if (c1.dataset.type === c2.dataset.type) {
                 if (c1.dataset.type === target) { showEnd(currentPlayer); return; }
-                if(currentPlayer === 2) setQinState("match");
                 switchTurn();
             } else {
-                if(currentPlayer === 2) setQinState("fail");
                 setTimeout(() => { c1.classList.remove('flipped'); c2.classList.remove('flipped'); switchTurn(); }, 400);
             }
         }
@@ -401,16 +191,18 @@
         }
 
         function showEnd(winner) {
-            const screen = document.getElementById('end-screen');
-            screen.classList.remove('hidden');
+            document.getElementById('end-screen').classList.remove('hidden');
+            const linkBtn = document.getElementById('album-link');
             if (winner === 1) {
                 setQinState("lose");
-                document.getElementById('end-title').innerText = "結局 A：凱旋";
-                document.getElementById('end-desc').innerText = `${playerName}，你成功的速度比我想像中快一點。秦徹交疊雙腿，嘴角帶著笑意：「既然是你贏了，戰利品歸你。我也會記得這筆帳。」`;
+                document.getElementById('end-title').innerText = "結局 A：贏得博弈";
+                document.getElementById('end-desc').innerText = `秦徹看著你：「不錯的實力。既然你贏了，這份『回憶錄』就歸你了。」`;
+                linkBtn.href = "win_album.html";
             } else {
                 setQinState("win");
-                document.getElementById('end-title').innerText = "結局 B：掌控";
-                document.getElementById('end-desc').innerText = `最後一張牌被秦徹翻開。「太慢了。」他低沉的聲音在耳邊響起，「在絕對的記憶面前，你的遲疑就是敗因。東西我收下了，至於你...今晚留下來陪我吧。」`;
+                document.getElementById('end-title').innerText = "結局 B：掌控之中";
+                document.getElementById('end-desc').innerText = `秦徹翻開最後一對牌：「太慢了。雖然你輸了，但如果你肯開口，我也不是不能分你一些東西...」`;
+                linkBtn.href = "lose_album.html";
             }
         }
     </script>
