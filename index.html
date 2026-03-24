@@ -3,358 +3,232 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>記憶對決：與秦徹的博弈</title>
+    <title>決戰勝利之巔 | THE PEAK OF VICTORY</title>
     <style>
         :root {
-            --bg-color: #050508;
-            --card-back: #121218;
-            --p1-color: #54a0ff;
-            --qin-color: #ff4d4d;
             --accent: #ffd32a;
-            --punish-color: #9c1c1c;
-            --text: #ffffff;
+            --qin-red: #ff4d4d;
+            --bg-dark: #050508;
+            --glass: rgba(255, 255, 255, 0.06);
+            --glass-border: rgba(255, 255, 255, 0.1);
         }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { background-color: var(--bg-color); color: var(--text); font-family: "Microsoft JhengHei", sans-serif; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow-x: hidden; touch-action: manipulation; }
-        
-        /* 響應式佈局 */
-        .main-container { display: flex; flex-direction: row; gap: 40px; align-items: center; width: 95%; max-width: 1100px; padding: 10px; }
+
+        * { box-sizing: border-box; }
+        body, html { 
+            margin: 0; padding: 0; 
+            background: var(--bg-dark); 
+            color: #fff; 
+            font-family: "Segoe UI", "Microsoft JhengHei", sans-serif; 
+            overflow-x: hidden;
+        }
+
+        /* --- 背景容器 --- */
+        .hero-section {
+            position: relative;
+            min-height: 100vh;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            /* 請確保 assets 資料夾中有對應圖片，或換成網址 */
+            background-image: linear-gradient(rgba(5, 5, 8, 0.65), rgba(5, 5, 8, 0.85)), 
+                              url('assets/bg_pc.jpg'); 
+            background-size: cover;
+            background-position: center center;
+            background-attachment: fixed;
+        }
+
         @media (max-width: 768px) {
-            .main-container { flex-direction: column; padding-top: 10px; }
-            .qin-section { width: 100% !important; flex-direction: row !important; height: 110px; }
-            .qin-portrait-frame { width: 85px !important; height: 110px !important; }
-            .qin-dialogue { font-size: 0.8rem !important; min-height: 45px !important; flex: 1; }
-            .grid { grid-template-columns: repeat(4, 75px) !important; grid-template-rows: repeat(3, 100px) !important; gap: 8px !important; }
-            .target-card { width: 95px !important; padding: 5px !important; }
-            .target-icon { width: 55px !important; height: 55px !important; }
+            .hero-section {
+                background-image: linear-gradient(rgba(5, 5, 8, 0.65), rgba(5, 5, 8, 0.85)), 
+                                  url('assets/bg_mobile.jpg');
+                background-attachment: scroll;
+            }
         }
 
-        /* 秦徹顯示區 */
-        .qin-section { width: 280px; display: flex; flex-direction: column; align-items: center; flex-shrink: 0; }
-        .qin-portrait-frame { width: 260px; height: 380px; background: linear-gradient(180deg, transparent, rgba(255, 77, 77, 0.1)); border-bottom: 3px solid var(--qin-color); overflow: hidden; display: flex; justify-content: center; align-items: flex-end; }
-        .qin-image { width: 100%; height: 100%; object-fit: contain; transition: opacity 0.4s ease-in-out; }
-        .qin-dialogue { margin-top: 10px; background: rgba(255, 255, 255, 0.03); border-left: 4px solid var(--qin-color); padding: 10px; width: 100%; min-height: 55px; font-size: 0.9rem; position: relative; line-height: 1.4; }
-        .qin-name-tag { position: absolute; top: -10px; left: 10px; background: var(--qin-color); padding: 1px 6px; font-size: 0.65rem; font-weight: bold; }
+        .content-wrapper {
+            z-index: 10;
+            padding: 40px 20px;
+            max-width: 1000px;
+            width: 100%;
+        }
 
-        /* 遊戲狀態 */
-        .game-section { flex: 1; display: flex; flex-direction: column; align-items: center; width: 100%; }
-        .status-bar { width: 100%; max-width: 500px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .player-badge { font-size: 0.9rem; padding: 8px 12px; opacity: 0.2; transition: 0.4s; font-weight: bold; }
-        .player-badge.active { opacity: 1; border-bottom: 2px solid white; }
+        /* --- 標題動畫 --- */
+        h1 {
+            font-size: clamp(2rem, 7vw, 3.8rem);
+            letter-spacing: clamp(4px, 1.5vw, 12px);
+            color: var(--accent);
+            text-shadow: 0 0 30px rgba(255, 211, 42, 0.5);
+            margin: 0;
+            animation: tracking-in-expand 1.2s cubic-bezier(0.215, 0.610, 0.355, 1.000) both;
+        }
 
-        /* 目標指示 (放大) */
-        .target-card { background: #000; border: 2px solid var(--accent); padding: 10px; text-align: center; border-radius: 12px; box-shadow: 0 0 15px rgba(255, 211, 42, 0.3); width: 115px; animation: pulse-glow 2s infinite ease-in-out; }
-        .target-icon { width: 70px; height: 70px; object-fit: contain; }
-        .target-label { font-size: 0.65rem; color: var(--accent); margin-top: 5px; font-weight: bold; }
-        @keyframes pulse-glow { 0%, 100% { transform: scale(1); box-shadow: 0 0 10px rgba(255, 211, 42, 0.3); } 50% { transform: scale(1.05); box-shadow: 0 0 20px rgba(255, 211, 42, 0.6); } }
+        .subtitle {
+            color: #aaa;
+            letter-spacing: 5px;
+            font-size: clamp(0.7rem, 1.5vw, 1rem);
+            margin-top: 10px;
+            text-transform: uppercase;
+            animation: fadeIn 1s 0.8s forwards;
+            opacity: 0;
+        }
 
-        /* 棋盤與卡牌 */
-        .grid { display: grid; grid-template-columns: repeat(4, 85px); grid-template-rows: repeat(3, 115px); gap: 12px; perspective: 1000px; }
-        .card { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform 0.5s; cursor: pointer; }
-        .card.flipped { transform: rotateY(180deg); cursor: default; }
-        .card-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 6px; display: flex; align-items: center; justify-content: center; }
-        .card-back { background: var(--card-back); border: 1px solid #333; color: #222; font-size: 1.2rem; }
-        .card-front { background: #fff; transform: rotateY(180deg); border: 2px solid #fff; }
-        .card-front img { width: 85%; height: 85%; object-fit: contain; }
+        /* --- 雙語規則框 --- */
+        .rules-container {
+            margin: 40px auto;
+            background: var(--glass);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            display: flex;
+            gap: 0;
+            text-align: left;
+            opacity: 0;
+            animation: fadeIn 1s 1.2s forwards;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+            overflow: hidden;
+        }
 
-        /* 結局彈窗 */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); display: flex; align-items: center; justify-content: center; z-index: 2000; padding: 20px; }
-        .modal-window { background: #111; padding: 30px; border-top: 4px solid var(--qin-color); text-align: center; width: 100%; max-width: 400px; }
-        .modal-window.punish { border-color: var(--punish-color); box-shadow: 0 0 30px var(--punish-color); }
-        .action-btn { background: var(--qin-color); color: white; border: none; padding: 12px; cursor: pointer; font-weight: bold; width: 100%; text-decoration: none; display: inline-block; margin-top: 10px; font-size: 1rem; letter-spacing: 1px; }
-        .gallery-btn { background: transparent; border: 1px solid var(--accent); color: var(--accent); }
-        .action-btn:disabled { background: #333; cursor: not-allowed; }
-        .hidden { display: none !important; }
-        .name-input { width: 100%; padding: 12px; margin: 15px 0; background: #222; border: 1px solid #444; color: white; text-align: center; }
-        #loss-count-ui { font-size: 0.7rem; color: #555; margin-top: 12px; letter-spacing: 1px; }
+        .rule-col {
+            flex: 1;
+            padding: 30px;
+            line-height: 1.8;
+        }
+
+        .rule-col.zh {
+            border-right: 1px solid var(--glass-border);
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .rule-col strong {
+            color: var(--qin-red);
+            display: block;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+            letter-spacing: 2px;
+            border-bottom: 1px solid rgba(255, 77, 77, 0.3);
+            padding-bottom: 5px;
+            width: fit-content;
+        }
+
+        .rule-col p {
+            margin: 0;
+            font-size: clamp(0.8rem, 1.3vw, 0.95rem);
+            color: #ddd;
+        }
+
+        /* --- 按鈕組 --- */
+        .btn-container {
+            display: flex;
+            gap: 25px;
+            justify-content: center;
+            opacity: 0;
+            animation: fadeIn 1s 1.6s forwards;
+            margin-top: 20px;
+        }
+
+        .lang-btn {
+            padding: 15px 40px;
+            border: 1px solid var(--accent);
+            background: transparent;
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: bold;
+            letter-spacing: 2px;
+            transition: all 0.3s;
+            min-width: 220px;
+        }
+
+        .lang-btn:hover {
+            background: var(--accent);
+            color: #000;
+            box-shadow: 0 0 25px rgba(255, 211, 42, 0.5);
+            transform: translateY(-3px);
+        }
+
+        /* --- 動態 --- */
+        @keyframes tracking-in-expand {
+            0% { letter-spacing: -0.5em; opacity: 0; }
+            40% { opacity: 0.6; }
+            100% { opacity: 1; }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- 手機版適配 --- */
+        @media (max-width: 768px) {
+            .rules-container {
+                flex-direction: column; /* 改為上下堆疊 */
+                margin: 30px 10px;
+            }
+            .rule-col.zh {
+                border-right: none;
+                border-bottom: 1px solid var(--glass-border);
+            }
+            .rule-col {
+                padding: 20px;
+            }
+            .btn-container {
+                flex-direction: column;
+                align-items: center;
+                gap: 15px;
+            }
+            .lang-btn {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
     </style>
 </head>
 <body>
 
-    <!-- 初始設定畫面 -->
-    <div id="setup-screen" class="modal-overlay">
-        <div class="modal-window">
-            <h2 style="color: var(--accent); letter-spacing: 4px;">記憶對決</h2>
-            <p style="color: #888; font-size: 0.8rem;">對手：秦徹</p>
-            <input type="text" id="p-name-input" class="name-input" placeholder="輸入妳的稱號" maxlength="8">
-            <button id="start-btn" class="action-btn" onclick="initGame()">進入戰局</button>
-        </div>
-    </div>
+    <section class="hero-section">
+        <div class="content-wrapper">
+            <h1>決戰勝利之巔</h1>
+            <div class="subtitle">THE PEAK OF VICTORY</div>
 
-    <!-- 結局與獎勵彈窗 -->
-    <div id="end-screen" class="modal-overlay hidden">
-        <div id="end-window" class="modal-window">
-            <h2 id="end-title"></h2>
-            <p id="end-desc" style="text-align: left; font-size: 0.9rem; color: #ccc; margin: 15px 0; line-height: 1.6;"></p>
-            <a id="gallery-link" href="#" class="action-btn gallery-btn hidden">進入回憶相簿</a>
-            <button id="continue-btn" class="action-btn" onclick="startNewRound()">繼續博弈</button>
-            <div id="loss-count-ui"></div>
-        </div>
-    </div>
-
-    <div class="main-container">
-        <!-- 秦徹區域 -->
-        <div class="qin-section">
-            <div class="qin-portrait-frame"><img id="qin-img" class="qin-image" src="" alt=""></div>
-            <div class="qin-dialogue"><div class="qin-name-tag">秦徹</div><span id="qin-text">載入中...</span></div>
-        </div>
-
-        <!-- 棋盤區域 -->
-        <div class="game-section">
-            <div class="status-bar">
-                <div id="p1-badge" class="player-badge active" style="color: var(--p1-color);">探測者</div>
-                <div class="target-card">
-                    <img id="target-icon" src="" class="target-icon">
-                    <div class="target-label">目標：<span id="target-name"></span></div>
+            <!-- 雙語規則框 -->
+            <div class="rules-container">
+                <!-- 中文版 -->
+                <div class="rule-col zh">
+                    <strong>遊戲規則</strong>
+                    <p>
+                        • 每局隨機決定玩家或秦徹先手。<br>
+                        • 卡牌將不重複輪替出現，共 6 組目標。<br>
+                        • 率先湊齊系統指定「目標牌組」即獲勝。<br>
+                        • 連續輸給秦徹 5 回，將觸發「懲罰遊戲」。<br>
+                        • 特定卡牌可解鎖專屬對話與神祕相簿。
+                    </p>
                 </div>
-                <div id="qin-badge" class="player-badge" style="color: var(--qin-color);">秦徹</div>
+                <!-- 英文版 -->
+                <div class="rule-col en">
+                    <strong>GAME RULES</strong>
+                    <p>
+                        • Turn order is randomly decided each round.<br>
+                        • Targets rotate through 6 unique sets without repetition.<br>
+                        • First to match the specified "Target" wins the round.<br>
+                        • Losing 5 times in a row triggers the "Punishment Game".<br>
+                        • Specific cards unlock unique stories and secret albums.
+                    </p>
+                </div>
             </div>
-            <div class="grid" id="grid"></div>
+
+            <!-- 雙語入口 -->
+            <div class="btn-container">
+                <a href="game.html" class="lang-btn">
+                    進入博弈 <small style="display:block; font-size:0.6rem; opacity:0.7;">TRADITIONAL CHINESE</small>
+                </a>
+                <a href="game_en.html" class="lang-btn">
+                    START DUEL <small style="display:block; font-size:0.6rem; opacity:0.7;">ENGLISH VERSION</small>
+                </a>
+            </div>
         </div>
-    </div>
+    </section>
 
-    <script>
-        const QIN_EXPRESSIONS = {
-            "normal":   { img: "https://via.placeholder.com/300x450?text=Qin_Normal", msg: "該妳了。別發呆，我沒這麼多耐心。" },
-            "thinking": { img: "https://via.placeholder.com/300x450?text=Qin_Thinking", msg: "讓我想想...隱藏在這些牌後的，會是什麼？" },
-            "match":    { img: "https://via.placeholder.com/300x450?text=Qin_Match", msg: "這對牌我就收下了。" },
-            "fail":     { img: "https://via.placeholder.com/300x450?text=Qin_Fail", msg: "嘖，記錯位置了嗎？有趣。" },
-            "win":      { img: "https://via.placeholder.com/300x450?text=Qin_Win", msg: "勝負已分。看來，妳還需要更多的練習。" },
-            "lose":     { img: "https://via.placeholder.com/300x450?text=Qin_Lose", msg: "這份驚喜，我收下了。" },
-            "punish":   { img: "https://via.placeholder.com/300x450?text=Qin_Punish", msg: "連續五次...看來妳真的很想被我『處置』。" }
-        };
-
-        const CARD_TYPES = {
-            "梅":   "https://cdn-icons-png.flaticon.com/128/1047/1047461.png",
-            "薛明": "https://cdn-icons-png.flaticon.com/128/4333/4333609.png",
-            "薛影": "https://cdn-icons-png.flaticon.com/128/4333/4333614.png",
-            "槍":   "https://cdn-icons-png.flaticon.com/128/5457/5457494.png",
-            "寶石": "https://cdn-icons-png.flaticon.com/128/1255/1255153.png",
-            "羽毛": "https://cdn-icons-png.flaticon.com/128/2913/2913501.png"
-        };
-
-        let targetPool = Object.keys(CARD_TYPES);
-        let currentTarget = "";
-        let playerName = "探測者";
-        let currentPlayer = 1; // 1: 玩家, 2: 秦徹
-        let flippedCards = [];
-        let isLocked = true;
-        let qinMemory = {};
-        let consecutiveLosses = parseInt(localStorage.getItem('qin_consecutive_losses')) || 0;
-
-        // --- 資源預載 ---
-        async function preloadResources() {
-            const urls = [...Object.values(QIN_EXPRESSIONS).map(e => e.img), ...Object.values(CARD_TYPES)];
-            const promises = urls.map(url => new Promise(resolve => {
-                const img = new Image(); img.src = url; img.onload = resolve; img.onerror = resolve;
-            }));
-            return Promise.all(promises);
-        }
-
-        async function initGame() {
-            const startBtn = document.getElementById('start-btn');
-            const nameInput = document.getElementById('p-name-input');
-            if (nameInput.value.trim()) playerName = nameInput.value.trim();
-            document.getElementById('p1-badge').innerText = playerName;
-
-            startBtn.disabled = true;
-            startBtn.innerText = "讀取中...";
-            await preloadResources();
-
-            document.getElementById('setup-screen').classList.add('hidden');
-            startNewRound();
-        }
-
-        // --- 開始新回合 (隨機先後手) ---
-        function startNewRound() {
-            document.getElementById('end-screen').classList.add('hidden');
-            
-            // 不重複目標邏輯
-            if (targetPool.length === 0) targetPool = Object.keys(CARD_TYPES);
-            const randomIndex = Math.floor(Math.random() * targetPool.length);
-            currentTarget = targetPool.splice(randomIndex, 1)[0];
-
-            document.getElementById('target-name').innerText = currentTarget;
-            document.getElementById('target-icon').src = CARD_TYPES[currentTarget];
-
-            // 生成隨機卡牌
-            const cardData = [...Object.keys(CARD_TYPES), ...Object.keys(CARD_TYPES)].sort(() => Math.random() - 0.5);
-            const grid = document.getElementById('grid');
-            grid.innerHTML = '';
-            cardData.forEach((type, i) => {
-                const card = document.createElement('div');
-                card.className = 'card';
-                card.dataset.type = type;
-                card.dataset.index = i;
-                card.innerHTML = `<div class="card-face card-back">?</div><div class="card-face card-front"><img src="${CARD_TYPES[type]}"></div>`;
-                card.onclick = () => { if(!isLocked && currentPlayer === 1 && !card.classList.contains('flipped')) handleFlip(card); };
-                grid.appendChild(card);
-            });
-
-            // 【核心】隨機決定先後手
-            currentPlayer = Math.random() < 0.5 ? 1 : 2;
-            flippedCards = [];
-            qinMemory = {};
-            
-            if (currentPlayer === 2) {
-                isLocked = true;
-                updateTurnUI();
-                setQinState("thinking", "這局由我先行。看清楚了...");
-                setTimeout(qinAIAction, 2000); // 給玩家 2 秒觀察目標
-            } else {
-                isLocked = false;
-                updateTurnUI();
-                setQinState("normal", `${playerName}，妳先請。別讓我等太久。`);
-            }
-        }
-
-        function handleFlip(card) {
-            card.classList.add('flipped');
-            flippedCards.push(card);
-            qinMemory[card.dataset.index] = card.dataset.type;
-
-            if (flippedCards.length === 2) {
-                isLocked = true;
-                setTimeout(checkMatch, 800);
-            }
-        }
-
-        function checkMatch() {
-            const [c1, c2] = flippedCards;
-            const isMatch = c1.dataset.type === c2.dataset.type;
-
-            if (isMatch) {
-                if (c1.dataset.type === currentTarget) {
-                    showFinalResult(currentPlayer);
-                    return;
-                }
-                if (currentPlayer === 2) setQinState("match");
-                flippedCards = [];
-                switchTurn();
-            } else {
-                if (currentPlayer === 2) setQinState("fail");
-                setTimeout(() => {
-                    c1.classList.remove('flipped');
-                    c2.classList.remove('flipped');
-                    flippedCards = [];
-                    switchTurn();
-                }, 500);
-            }
-        }
-
-        function switchTurn() {
-            currentPlayer = (currentPlayer === 1) ? 2 : 1;
-            updateTurnUI();
-            if (currentPlayer === 2) {
-                isLocked = true;
-                setQinState("thinking");
-                setTimeout(qinAIAction, 1200);
-            } else {
-                isLocked = false;
-                setQinState("normal");
-            }
-        }
-
-        function qinAIAction() {
-            const cards = document.querySelectorAll('.card');
-            const hiddenIndexes = [...cards].filter(c => !c.classList.contains('flipped')).map(c => parseInt(c.dataset.index));
-            if (hiddenIndexes.length === 0) return;
-
-            const inMemory = Object.keys(qinMemory).filter(idx => qinMemory[idx] === currentTarget && hiddenIndexes.includes(parseInt(idx)));
-            let p1, p2;
-
-            if (inMemory.length >= 2) {
-                p1 = inMemory[0]; p2 = inMemory[1];
-            } else {
-                p1 = hiddenIndexes[Math.floor(Math.random() * hiddenIndexes.length)];
-                handleFlip(cards[p1]);
-                setTimeout(() => {
-                    const type1 = cards[p1].dataset.type;
-                    const matchIdx = Object.keys(qinMemory).find(idx => qinMemory[idx] === type1 && idx != p1 && hiddenIndexes.includes(parseInt(idx)));
-                    p2 = matchIdx || hiddenIndexes.filter(i => i != p1)[Math.floor(Math.random() * (hiddenIndexes.length - 1))];
-                    handleFlip(cards[p2]);
-                }, 800);
-                return;
-            }
-            handleFlip(cards[p1]); setTimeout(() => handleFlip(cards[p2]), 800);
-        }
-
-        function showFinalResult(winner) {
-            const screen = document.getElementById('end-screen');
-            const windowEl = document.getElementById('end-window');
-            const title = document.getElementById('end-title');
-            const desc = document.getElementById('end-desc');
-            const link = document.getElementById('gallery-link');
-            const trackerUI = document.getElementById('loss-count-ui');
-
-            screen.classList.remove('hidden');
-            windowEl.classList.remove('punish');
-            link.classList.add('hidden');
-
-            if (winner === 1) {
-                consecutiveLosses = 0;
-                setQinState("lose");
-                switch(currentTarget) {
-                    case "梅":
-                        title.innerText = "結局：梅的謝禮";
-                        desc.innerText = `妳成功拿到了梅。秦徹看著妳手中的牌：『看來那傢伙很中意妳，這顆寶石就當作是妳贏得的額外獎勵。』`;
-                        break;
-                    case "薛明":
-                        title.innerText = "結局：銘謝惠顧";
-                        desc.innerText = `字條上寫著：『銘謝惠顧，下次再來。』\n秦徹搖了搖頭：『薛明那小子的惡作劇...不過，這局確實是妳贏了。』`;
-                        break;
-                    case "薛影":
-                        title.innerText = "結局：再來一次";
-                        desc.innerText = `妳翻開了薛影，背面寫著：『再來一次』。\n秦徹語氣玩味：『既然薛影都這麼說了，妳還想繼續嗎？』`;
-                        break;
-                    case "槍":
-                        title.innerText = "結局：火力升級";
-                        desc.innerText = `獲得了最新型號武器。秦徹點了一根煙：『這把槍挺適合妳，希望妳能發揮它的價值。』`;
-                        break;
-                    case "寶石":
-                        title.innerText = "結局 A：贏得博弈";
-                        desc.innerText = `妳拿到了最珍貴的寶石。秦徹願賭服輸，交出了他私人相簿的存取權限。`;
-                        link.classList.remove('hidden'); link.href = "win_album.html";
-                        break;
-                    default:
-                        title.innerText = "結局：奪取勝利";
-                        desc.innerText = `妳拿到了「${currentTarget}」。秦徹看著妳，眼底閃過一絲讚許。`;
-                }
-            } else {
-                consecutiveLosses++;
-                if (consecutiveLosses >= 5) {
-                    consecutiveLosses = 0;
-                    setQinState("punish");
-                    windowEl.classList.add('punish');
-                    title.innerText = "結局 C：懲罰遊戲";
-                    desc.innerText = `連輸五次...${playerName}，妳是不是故意的？\n秦徹緩緩靠近，扣住妳的下巴：『既然記不住教訓，那就用身體來記住敗北的滋味吧。』`;
-                    link.classList.remove('hidden'); link.href = "punish_album.html";
-                } else {
-                    setQinState("win");
-                    title.innerText = "結局 B：掌控之中";
-                    desc.innerText = `秦徹拿到了「${currentTarget}」：『太慢了。雖然妳輸了，但如果妳肯求我，相簿也不是不能給妳看...』`;
-                    link.classList.remove('hidden'); link.href = "lose_album.html";
-                }
-            }
-            localStorage.setItem('qin_consecutive_losses', consecutiveLosses);
-            trackerUI.innerText = `目前連敗次數：${consecutiveLosses} / 5`;
-        }
-
-        function updateTurnUI() {
-            document.getElementById('p1-badge').classList.toggle('active', currentPlayer === 1);
-            document.getElementById('qin-badge').classList.toggle('active', currentPlayer === 2);
-        }
-
-        function setQinState(stateKey, customMsg = null) {
-            const data = QIN_EXPRESSIONS[stateKey];
-            const img = document.getElementById('qin-img');
-            img.style.opacity = 0;
-            setTimeout(() => {
-                img.src = data.img;
-                document.getElementById('qin-text').innerText = customMsg || data.msg;
-                img.style.opacity = 1;
-            }, 200);
-        }
-    </script>
 </body>
 </html>

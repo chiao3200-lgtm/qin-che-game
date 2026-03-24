@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Memory Duel: A Gambit with Sylus</title>
+    <style>
+        :root {
+            --bg-color: #050508;
+            --card-back-bg: #121218;
+            --p1-color: #54a0ff;
+            --qin-color: #ff4d4d;
+            --accent: #ffd32a;
+            --punish-color: #9c1c1c;
+            --text: #ffffff;
+        }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { background-color: var(--bg-color); color: var(--text); font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow-x: hidden; touch-action: manipulation; }
+        
+        /* Responsive Layout */
+        .main-container { display: flex; flex-direction: row; gap: 40px; align-items: center; width: 95%; max-width: 1100px; padding: 10px; }
+        @media (max-width: 768px) {
+            .main-container { flex-direction: column; padding-top: 10px; }
+            .qin-section { width: 100% !important; flex-direction: row !important; height: 120px; }
+            .qin-portrait-frame { width: 90px !important; height: 120px !important; }
+            .qin-dialogue { font-size: 0.8rem !important; min-height: 65px !important; flex: 1; overflow-y: auto; }
+            .grid { grid-template-columns: repeat(4, 75px) !important; grid-template-rows: repeat(3, 100px) !important; gap: 8px !important; }
+            .target-card { width: 95px !important; padding: 5px !important; }
+            .target-icon { width: 50px !important; height: 50px !important; }
+        }
+
+        /* Sylus Section & Animation */
+        .qin-section { width: 300px; display: flex; flex-direction: column; align-items: center; flex-shrink: 0; }
+        .qin-portrait-frame {
+            width: 280px; height: 420px;
+            background: radial-gradient(circle at center, rgba(255, 77, 77, 0.15) 0%, transparent 70%);
+            border-bottom: 3px solid var(--qin-color);
+            overflow: hidden;
+            display: flex; justify-content: center; align-items: flex-end;
+            position: relative;
+        }
+
+        .qin-image {
+            width: 100%; height: 100%;
+            object-fit: contain;
+            transition: opacity 0.4s ease-in-out;
+            animation: qinBreathing 4s ease-in-out infinite;
+        }
+
+        @keyframes qinBreathing {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-10px) scale(1.02); }
+        }
+
+        .shake { animation: qinShake 0.5s cubic-bezier(.36,.07,.19,.97) both; }
+        @keyframes qinShake {
+            10%, 90% { transform: translate3d(-2px, 0, 0); }
+            20%, 80% { transform: translate3d(3px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-5px, 0, 0); }
+            40%, 60% { transform: translate3d(5px, 0, 0); }
+        }
+
+        .qin-dialogue { margin-top: 12px; background: rgba(255, 255, 255, 0.03); border-left: 4px solid var(--qin-color); padding: 12px; width: 100%; min-height: 80px; font-size: 0.9rem; position: relative; line-height: 1.5; color: #eee; }
+        .qin-name-tag { position: absolute; top: -10px; left: 10px; background: var(--qin-color); padding: 1px 6px; font-size: 0.65rem; font-weight: bold; }
+
+        /* Game Board Area */
+        .game-section { flex: 1; display: flex; flex-direction: column; align-items: center; width: 100%; }
+        .status-bar { width: 100%; max-width: 500px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .player-badge { font-size: 0.9rem; padding: 8px 12px; opacity: 0.2; transition: 0.4s; font-weight: bold; }
+        .player-badge.active { opacity: 1; border-bottom: 2px solid white; }
+
+        .target-card { background: #000; border: 2px solid var(--accent); padding: 10px; text-align: center; border-radius: 12px; box-shadow: 0 0 15px rgba(255, 211, 42, 0.3); width: 115px; animation: pulse-glow 2s infinite ease-in-out; }
+        .target-icon { width: 65px; height: 65px; object-fit: contain; }
+        .target-label { font-size: 0.65rem; color: var(--accent); margin-top: 5px; font-weight: bold; }
+        @keyframes pulse-glow { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+
+        .grid { display: grid; grid-template-columns: repeat(4, 85px); grid-template-rows: repeat(3, 115px); gap: 12px; perspective: 1000px; }
+        .card { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform 0.5s; cursor: pointer; }
+        .card.flipped { transform: rotateY(180deg); cursor: default; }
+        .card-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 6px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .card-back { background-color: var(--card-back-bg); border: 1px solid #333; background-size: cover; background-position: center; }
+        .card-front { background: #fff; transform: rotateY(180deg); border: 2px solid #fff; }
+        .card-front img { width: 85%; height: 85%; object-fit: contain; }
+
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); display: flex; align-items: center; justify-content: center; z-index: 2000; padding: 20px; }
+        .modal-window { background: #111; padding: 30px; border-top: 4px solid var(--qin-color); text-align: center; width: 100%; max-width: 420px; box-shadow: 0 10px 40px rgba(0,0,0,0.8); }
+        .modal-window.punish { border-color: var(--punish-color); box-shadow: 0 0 30px var(--punish-color); }
+        .action-btn { background: var(--qin-color); color: white; border: none; padding: 12px; cursor: pointer; font-weight: bold; width: 100%; text-decoration: none; display: inline-block; margin-top: 10px; font-size: 1rem; letter-spacing: 1px; }
+        .gallery-btn { background: transparent; border: 1px solid var(--accent); color: var(--accent); }
+        .hidden { display: none !important; }
+        .name-input { width: 100%; padding: 12px; margin: 15px 0; background: #222; border: 1px solid #444; color: white; text-align: center; }
+        #loss-count-ui { font-size: 0.7rem; color: #555; margin-top: 12px; }
+    </style>
+</head>
+<body>
+
+    <!-- Initial Setup -->
+    <div id="setup-screen" class="modal-overlay">
+        <div class="modal-window">
+            <h2 style="color: var(--accent); letter-spacing: 4px;">Duel for the Peak</h2>
+            <p style="color: #888; font-size: 0.8rem;">Sylus: Your taste is truly tacky.</p>
+            <input type="text" id="p-name-input" class="name-input" placeholder="Enter your name" maxlength="8">
+            <button id="start-btn" class="action-btn" onclick="initGame()">Start Duel</button>
+        </div>
+    </div>
+
+    <!-- Final Result Modal -->
+    <div id="end-screen" class="modal-overlay hidden">
+        <div id="end-window" class="modal-window">
+            <h2 id="end-title"></h2>
+            <p id="end-desc" style="text-align: left; font-size: 0.95rem; color: #eee; margin: 20px 0; line-height: 1.6;"></p>
+            <a id="gallery-link" href="#" class="action-btn gallery-btn hidden">E N T E R</a>
+            <button class="action-btn" onclick="startNewRound()">Continue Duel</button>
+            <div id="loss-count-ui"></div>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <div class="qin-section">
+            <div class="qin-portrait-frame"><img id="qin-img" class="qin-image" src="" alt=""></div>
+            <div id="qin-bubble" class="qin-dialogue"><div class="qin-name-tag">Sylus</div><span id="qin-text">Loading...</span></div>
+        </div>
+        <div class="game-section">
+            <div class="status-bar">
+                <div id="p1-badge" class="player-badge active">Hunter</div>
+                <div class="target-card">
+                    <img id="target-icon" src="" class="target-icon">
+                    <div class="target-label">Target: <span id="target-name"></span></div>
+                </div>
+                <div id="qin-badge" class="player-badge" style="color: var(--qin-color);">Sylus</div>
+            </div>
+            <div class="grid" id="grid"></div>
+        </div>
+    </div>
+
+    <script>
+        const CARD_BACK_IMG = "https://via.placeholder.com/360x480?text=Qin_Logo"; 
+
+        const SYLUS_EXPRESSIONS = {
+            "normal":   { img: "https://via.placeholder.com/300x450?text=Sylus_Normal", msg: "Your turn. Don't daze off, I don't have much patience." },
+            "thinking": { img: "https://via.placeholder.com/300x450?text=Sylus_Thinking", msg: "Let's see... what exactly is hidden behind these cards?" },
+            "match":    { img: "https://via.placeholder.com/300x450?text=Sylus_Match", msg: "I'll take this pair. Thanks." },
+            "fail":     { img: "https://via.placeholder.com/300x450?text=Sylus_Fail", msg: "Tsk, did I remember it wrong? Interesting." },
+            "win":      { img: "https://via.placeholder.com/300x450?text=Sylus_Win", msg: "Victory is mine." },
+            "lose":     { img: "https://via.placeholder.com/300x450?text=Sylus_Lose", msg: "Impressive." },
+            "punish":   { img: "https://via.placeholder.com/300x450?text=Sylus_Punish", msg: "Five times in a row..." }
+        };
+
+        const CARD_TYPES = {
+            "Mephisto": "https://cdn-icons-png.flaticon.com/128/1047/1047461.png",
+            "Luke":     "https://cdn-icons-png.flaticon.com/128/4333/4333609.png",
+            "Silas":    "https://cdn-icons-png.flaticon.com/128/4333/4333614.png",
+            "Gun":      "https://cdn-icons-png.flaticon.com/128/5457/5457494.png",
+            "Gem":      "https://cdn-icons-png.flaticon.com/128/1255/1255153.png",
+            "Wine":     "https://cdn-icons-png.flaticon.com/128/1044/1044391.png"
+        };
+
+        let targetPool = Object.keys(CARD_TYPES);
+        let currentTarget = "";
+        let playerName = "Hunter";
+        let currentPlayer = 1;
+        let flippedCards = [];
+        let isLocked = true;
+        let qinMemory = {};
+        let consecutiveLosses = parseInt(localStorage.getItem('sylus_consecutive_losses')) || 0;
+
+        async function preloadResources() {
+            const urls = [CARD_BACK_IMG, ...Object.values(SYLUS_EXPRESSIONS).map(e => e.img), ...Object.values(CARD_TYPES)];
+            const promises = urls.map(url => new Promise(resolve => {
+                const img = new Image(); img.src = url; img.onload = resolve; img.onerror = resolve;
+            }));
+            return Promise.all(promises);
+        }
+
+        async function initGame() {
+            const nameInput = document.getElementById('p-name-input');
+            if (nameInput.value.trim()) playerName = nameInput.value.trim();
+            document.getElementById('p1-badge').innerText = playerName;
+            document.getElementById('start-btn').disabled = true;
+            document.getElementById('start-btn').innerText = "Loading...";
+            await preloadResources();
+            document.getElementById('setup-screen').classList.add('hidden');
+            startNewRound();
+        }
+
+        function startNewRound() {
+            document.getElementById('end-screen').classList.add('hidden');
+            if (targetPool.length === 0) targetPool = Object.keys(CARD_TYPES);
+            const randomIndex = Math.floor(Math.random() * targetPool.length);
+            currentTarget = targetPool.splice(randomIndex, 1)[0];
+            document.getElementById('target-name').innerText = currentTarget;
+            document.getElementById('target-icon').src = CARD_TYPES[currentTarget];
+
+            const cardData = [...Object.keys(CARD_TYPES), ...Object.keys(CARD_TYPES)].sort(() => Math.random() - 0.5);
+            const grid = document.getElementById('grid');
+            grid.innerHTML = '';
+            cardData.forEach((type, i) => {
+                const card = document.createElement('div');
+                card.className = 'card'; card.dataset.type = type; card.dataset.index = i;
+                card.innerHTML = `<div class="card-face card-back" style="background-image: url('${CARD_BACK_IMG}')"></div><div class="card-face card-front"><img src="${CARD_TYPES[type]}"></div>`;
+                card.onclick = () => { if(!isLocked && currentPlayer === 1 && !card.classList.contains('flipped')) handleFlip(card); };
+                grid.appendChild(card);
+            });
+
+            currentPlayer = Math.random() < 0.5 ? 1 : 2;
+            flippedCards = []; qinMemory = {};
+            if (currentPlayer === 2) {
+                isLocked = true; updateTurnUI();
+                setQinState("thinking", "I'll go first this round. Watch closely...");
+                setTimeout(qinAIAction, 2000);
+            } else {
+                isLocked = false; updateTurnUI();
+                setQinState("normal", `${playerName}, you go first. Don't make me wait.`);
+            }
+        }
+
+        function handleFlip(card) {
+            card.classList.add('flipped');
+            flippedCards.push(card);
+            qinMemory[card.dataset.index] = card.dataset.type;
+            if (flippedCards.length === 2) { isLocked = true; setTimeout(checkMatch, 800); }
+        }
+
+        function checkMatch() {
+            const [c1, c2] = flippedCards;
+            if (c1.dataset.type === c2.dataset.type) {
+                if (c1.dataset.type === currentTarget) {
+                    processEndingSequence(currentPlayer);
+                    return;
+                }
+                if (currentPlayer === 2) setQinState("match");
+                flippedCards = []; switchTurn();
+            } else {
+                if (currentPlayer === 2) setQinState("fail");
+                setTimeout(() => { c1.classList.remove('flipped'); c2.classList.remove('flipped'); flippedCards = []; switchTurn(); }, 500);
+            }
+        }
+
+        function switchTurn() {
+            currentPlayer = (currentPlayer === 1) ? 2 : 1;
+            updateTurnUI();
+            if (currentPlayer === 2) { isLocked = true; setQinState("thinking"); setTimeout(qinAIAction, 1200); }
+            else { isLocked = false; setQinState("normal"); }
+        }
+
+        function qinAIAction() {
+            const cards = document.querySelectorAll('.card');
+            const hidden = [...cards].filter(c => !c.classList.contains('flipped')).map(c => parseInt(c.dataset.index));
+            if (hidden.length === 0) return;
+            const inMem = Object.keys(qinMemory).filter(idx => qinMemory[idx] === currentTarget && hidden.includes(parseInt(idx)));
+            let p1, p2;
+            if (inMem.length >= 2) { p1 = inMem[0]; p2 = inMem[1]; }
+            else {
+                p1 = hidden[Math.floor(Math.random() * hidden.length)];
+                handleFlip(cards[p1]);
+                setTimeout(() => {
+                    const matchIdx = Object.keys(qinMemory).find(idx => qinMemory[idx] === cards[p1].dataset.type && idx != p1 && hidden.includes(parseInt(idx)));
+                    p2 = matchIdx || hidden.filter(i => i != p1)[Math.floor(Math.random() * (hidden.length - 1))];
+                    handleFlip(cards[p2]);
+                }, 800); return;
+            }
+            handleFlip(cards[p1]); setTimeout(() => handleFlip(cards[p2]), 800);
+        }
+
+        function processEndingSequence(winner) {
+            let reactionMsg = ""; 
+            let title = "";       
+            let story = "";       
+            let qinState = "";    
+            let url = "";         
+
+            if (winner === 1) {
+                consecutiveLosses = 0;
+                qinState = "lose";
+                reactionMsg = "Game over. It seems I underestimated you.";
+
+                switch(currentTarget) {
+                    case "Mephisto":
+                        title = "Ending: Mephisto's Reward";
+                        story = `${playerName}, you successfully got Mephisto. Sylus watches you: 'Mephisto has been eyeing this gem for a long time, now it's yours. Consider it your reward.' 'Caw!!'`;
+                        break;
+                    case "Luke":
+                        title = "Ending: Better Luck Next Time";
+                        story = `'That brat said to open this if you drew his card.' Inside is a note from Luke: 'Thanks for playing, try again next time.' Sylus shakes his head with a smirk: 'Luke's little pranks... but a win is a win.'`;
+                        break;
+                    case "Silas":
+                        title = "Ending: One More Time";
+                        story = `You flipped Silas's card. Scribbled on the back is: 'One more time.' Sylus says playfully: 'Since Silas said so, shall we continue?'`;
+                        break;
+                    case "Gun":
+                        title = "Ending: Firepower Upgrade";
+                        story = `You obtained the latest N109 pistol. Sylus leans back, watching you play with it: 'It suits you. At least now it has some value.'`;
+                        break;
+                    case "Wine":
+                        title = "Ending: Victory Celebration";
+                        story = `Since you won with wine, it's only right to open a real bottle. Sylus pours the red liquid: 'An excellent vintage. A toast to your victory, ${playerName}.'`;
+                        break;
+                    case "Gem":
+                        title = "Ending A: Winning the Gambit";
+                        story = `You obtained the most precious gem. 'A bet is a bet. You can do whatever you want now.' Sylus hands over his personal access.`;
+                        url = "win_album.html";
+                        break;
+                    default:
+                        title = "Ending: Victory Seized";
+                        story = `You got the "${currentTarget}". Sylus looks at you with a hint of approval in his eyes.`;
+                }
+            } else {
+                consecutiveLosses++;
+                if (consecutiveLosses >= 5) {
+                    consecutiveLosses = 0;
+                    qinState = "punish";
+                    reactionMsg = "Five times... Since you won't learn, I'll have to teach you another way.";
+                    title = "Ending C: Punishment Game";
+                    story = `Five losses in a row... ${playerName}, are you doing this on purpose? Sylus leans in, gripping your chin: 'If your head won't remember, I'll make sure your body does.'`;
+                    url = "punish_album.html";
+                } else {
+                    qinState = "win";
+                    reactionMsg = "It seems you don't know me as well as you thought.";
+                    title = "Ending B: Under Control";
+                    story = `Sylus flips the "${currentTarget}": 'Too slow. In my world, losers must pay a price. I hope you're prepared.'`;
+                    url = "lose_album.html";
+                }
+            }
+
+            setQinState(qinState, reactionMsg);
+            if(qinState === 'punish') document.getElementById('qin-img').classList.add('shake');
+
+            setTimeout(() => {
+                const screen = document.getElementById('end-screen');
+                const winEl = document.getElementById('end-window');
+                const link = document.getElementById('gallery-link');
+                
+                document.getElementById('end-title').innerText = title;
+                document.getElementById('end-desc').innerText = story;
+                winEl.classList.toggle('punish', qinState === "punish");
+                
+                if (url) { link.classList.remove('hidden'); link.href = url; }
+                else { link.classList.add('hidden'); }
+
+                document.getElementById('loss-count-ui').innerText = `Losses: ${localStorage.getItem('sylus_consecutive_losses') || 0} / 5`;
+                screen.classList.remove('hidden');
+                document.getElementById('qin-img').classList.remove('shake');
+            }, 3000);
+
+            localStorage.setItem('sylus_consecutive_losses', consecutiveLosses);
+        }
+
+        function updateTurnUI() {
+            document.getElementById('p1-badge').classList.toggle('active', currentPlayer === 1);
+            document.getElementById('qin-badge').classList.toggle('active', currentPlayer === 2);
+        }
+
+        function setQinState(stateKey, customMsg = null) {
+            const data = SYLUS_EXPRESSIONS[stateKey];
+            const img = document.getElementById('qin-img');
+            img.style.opacity = 0;
+            setTimeout(() => {
+                img.src = data.img;
+                document.getElementById('qin-text').innerText = customMsg || data.msg;
+                img.style.opacity = 1;
+            }, 200);
+        }
+    </script>
+</body>
+</html>
