@@ -101,7 +101,7 @@
         <div class="modal-window">
             <h2 style="color: var(--accent); letter-spacing: 4px;">我要成為卡牌王</h2>
             <p style="color: #888; font-size: 0.8rem;">秦 徹：妳的品味真的很土。</p>
-            <input type="text" id="p-name-input" class="name-input" placeholder="輸入妳的名字" maxlength="8">
+            <input type="text" id="p-name-input" class="name-input" placeholder="輸入姓名，預設: 小狸花" maxlength="8">
             <button id="start-btn" class="action-btn" onclick="initGame()">開始對決</button>
         </div>
     </div>
@@ -130,7 +130,7 @@
 
         <div class="game-section">
             <div class="status-bar">
-                <div id="p1-badge" class="player-badge active">探測者</div>
+                <div id="p1-badge" class="player-badge active">小狸花</div>
                 <div class="target-card">
                     <img id="target-icon" src="" class="target-icon">
                     <div class="target-label">目標：<span id="target-name"></span></div>
@@ -160,13 +160,13 @@
             "薛明": "https://cdn-icons-png.flaticon.com/128/4333/4333609.png",
             "薛影": "https://cdn-icons-png.flaticon.com/128/4333/4333614.png",
             "槍":   "https://cdn-icons-png.flaticon.com/128/5457/5457494.png",
-            "寶石": "https://cdn-icons-png.flaticon.com/128/1255/1255153.png",
-            "紅酒": "https://cdn-icons-png.flaticon.com/128/1044/1044391.png"
+            "寶石": "assets/gem.png",
+            "紅酒": "assets/wine.png"
         };
 
         let targetPool = Object.keys(CARD_TYPES);
         let currentTarget = "";
-        let playerName = "探測者";
+        let playerName = "小狸花";
         let currentPlayer = 1;
         let flippedCards = [];
         let isLocked = true;
