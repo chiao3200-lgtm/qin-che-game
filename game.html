@@ -13,32 +13,86 @@
             --accent: #ffd32a;
             --punish-color: #9c1c1c;
             --text: #ffffff;
-            --narration: #aaa; /* 敘述文字顏色 */
-        }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { background-color: var(--bg-color); color: var(--text); font-family: "Microsoft JhengHei", sans-serif; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow-x: hidden; touch-action: manipulation; }
-        
-        /* 響應式佈局 */
-        .main-container { display: flex; flex-direction: row; gap: 40px; align-items: center; width: 95%; max-width: 1100px; padding: 10px; }
-        @media (max-width: 768px) {
-            .main-container { flex-direction: column; padding-top: 10px; }
-            .qin-section { width: 100% !important; flex-direction: row !important; height: 130px; }
-            .qin-portrait-frame { width: 90px !important; height: 130px !important; }
-            .qin-dialogue { font-size: 0.8rem !important; min-height: 70px !important; flex: 1; overflow-y: auto; }
-            .grid { grid-template-columns: repeat(4, 75px) !important; grid-template-rows: repeat(3, 100px) !important; gap: 8px !important; }
-            .target-card { width: 90px !important; }
-            .target-icon { width: 50px !important; height: 50px !important; }
+            --narration: #aaa;
         }
 
-        /* --- 秦徹區域與動畫 --- */
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        body { 
+            background-color: var(--bg-color); 
+            color: var(--text); 
+            font-family: "Microsoft JhengHei", sans-serif; 
+            margin: 0; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            width: 100vw;
+            overflow: hidden; 
+            touch-action: manipulation; 
+        }
+
+        /* --- 響應式主容器 --- */
+        .main-container { 
+            display: flex; 
+            flex-direction: row; /* 電腦全螢幕預設左右佈局 */
+            gap: 20px; 
+            align-items: center; 
+            justify-content: center;
+            width: 100%;
+            max-width: 1200px;
+            height: auto;
+            max-height: 100vh;
+            padding: 20px;
+            transition: all 0.4s ease;
+        }
+
+        /* --- 當視窗寬度縮小 (視窗化或手機) --- */
+        @media (max-width: 900px) {
+            .main-container { 
+                flex-direction: column; /* 改為上下堆疊 */
+                padding: 10px;
+                overflow-y: auto; /* 高度不足時允許捲動 */
+                justify-content: flex-start;
+            }
+            .qin-section { 
+                width: 100% !important; 
+                flex-direction: row !important; 
+                height: auto !important;
+                max-height: 150px;
+                margin-bottom: 10px;
+            }
+            .qin-portrait-frame { 
+                width: 100px !important; 
+                height: 140px !important; 
+                flex-shrink: 0;
+            }
+            .qin-dialogue { 
+                margin-top: 0 !important;
+                flex: 1;
+                font-size: 0.85rem !important;
+                min-height: 60px !important;
+            }
+            .grid {
+                /* 手機與窄視窗卡片縮小 */
+                grid-template-columns: repeat(4, clamp(65px, 20vw, 85px)) !important;
+                grid-template-rows: repeat(3, clamp(90px, 25vh, 115px)) !important;
+                gap: 8px !important;
+            }
+        }
+
+        /* --- 秦徹區域動畫與排版 --- */
         .qin-section { width: 300px; display: flex; flex-direction: column; align-items: center; flex-shrink: 0; }
+        
         .qin-portrait-frame {
-            width: 280px; height: 420px;
+            width: 280px; 
+            height: 420px;
             background: radial-gradient(circle at center, rgba(255, 77, 77, 0.15) 0%, transparent 70%);
             border-bottom: 3px solid var(--qin-color);
             overflow: hidden;
             display: flex; justify-content: center; align-items: flex-end;
             position: relative;
+            max-height: 60vh; /* 防止電腦版矮視窗卡到棋盤 */
         }
 
         .qin-image {
@@ -50,7 +104,7 @@
 
         @keyframes qinBreathing {
             0%, 100% { transform: translateY(0) scale(1); }
-            50% { transform: translateY(-10px) scale(1.02); }
+            50% { transform: translateY(-8px) scale(1.01); }
         }
 
         .shake { animation: qinShake 0.5s cubic-bezier(.36,.07,.19,.97) both; }
@@ -61,21 +115,48 @@
             40%, 60% { transform: translate3d(5px, 0, 0); }
         }
 
-        .qin-dialogue { margin-top: 12px; background: rgba(255, 255, 255, 0.03); border-left: 4px solid var(--qin-color); padding: 12px; width: 100%; min-height: 85px; font-size: 0.95rem; position: relative; line-height: 1.5; }
+        .qin-dialogue { 
+            margin-top: 12px; 
+            background: rgba(255, 255, 255, 0.03); 
+            border-left: 4px solid var(--qin-color); 
+            padding: 12px; 
+            width: 100%; 
+            min-height: 85px; 
+            font-size: 0.95rem; 
+            position: relative; 
+            line-height: 1.5; 
+        }
         .qin-name-tag { position: absolute; top: -10px; left: 10px; background: var(--qin-color); padding: 1px 8px; font-size: 0.7rem; font-weight: bold; }
 
-        /* 遊戲棋盤與 UI */
+        /* --- 遊戲棋盤與 UI --- */
         .game-section { flex: 1; display: flex; flex-direction: column; align-items: center; width: 100%; }
-        .status-bar { width: 100%; max-width: 500px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        
+        .status-bar { 
+            width: 100%; 
+            max-width: 500px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 20px; 
+        }
+
         .player-badge { font-size: 0.9rem; padding: 8px 12px; opacity: 0.2; transition: 0.4s; font-weight: bold; border-bottom: 2px solid transparent; }
         .player-badge.active { opacity: 1; border-bottom: white 2px solid; }
 
-        .target-card { background: #000; border: 2px solid var(--accent); padding: 10px; text-align: center; border-radius: 12px; box-shadow: 0 0 15px rgba(255, 211, 42, 0.3); width: 115px; animation: pulse 2s infinite; }
-        .target-icon { width: 65px; height: 65px; object-fit: contain; }
+        .target-card { background: #000; border: 2px solid var(--accent); padding: 10px; text-align: center; border-radius: 12px; box-shadow: 0 0 15px rgba(255, 211, 42, 0.3); width: 110px; animation: pulse 2s infinite; }
+        .target-icon { width: 60px; height: 60px; object-fit: contain; }
         .target-label { font-size: 0.65rem; color: var(--accent); margin-top: 5px; font-weight: bold; }
         @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
 
-        .grid { display: grid; grid-template-columns: repeat(4, 85px); grid-template-rows: repeat(3, 115px); gap: 12px; perspective: 1000px; }
+        /* 棋盤網格：電腦版固定尺寸，窄視窗自動變小 */
+        .grid { 
+            display: grid; 
+            grid-template-columns: repeat(4, 85px); 
+            grid-template-rows: repeat(3, 115px); 
+            gap: 12px; 
+            perspective: 1000px; 
+        }
+
         .card { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform 0.5s; cursor: pointer; }
         .card.flipped { transform: rotateY(180deg); cursor: default; }
         .card-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 6px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
@@ -83,57 +164,23 @@
         .card-front { background: #fff; transform: rotateY(180deg); border: 2px solid #fff; }
         .card-front img { width: 85%; height: 85%; object-fit: contain; }
 
-        /* --- 結局視窗美化區 --- */
+        /* --- 結局彈窗 --- */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.92); display: flex; align-items: center; justify-content: center; z-index: 2000; padding: 20px; }
-        
         .modal-window { 
             background: linear-gradient(145deg, #111 0%, #050508 100%);
-            padding: 40px; 
+            padding: 30px; 
             border-top: 4px solid var(--qin-color); 
             text-align: center; 
             width: 100%;
-            max-width: 480px; 
+            max-width: 450px; 
             box-shadow: 0 15px 60px rgba(0,0,0,1); 
-            border-radius: 2px;
         }
-        
         .modal-window.punish { border-color: var(--punish-color); box-shadow: 0 0 40px var(--punish-color); }
-
-        #end-title { 
-            color: var(--accent); 
-            letter-spacing: 4px; 
-            margin-bottom: 25px; 
-            font-size: 1.6rem;
-            position: relative;
-            display: inline-block;
-        }
-        #end-title::after {
-            content: "";
-            position: absolute;
-            bottom: -8px; left: 10%; width: 80%;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, var(--accent), transparent);
-        }
-
-        #end-desc { 
-            text-align: left; 
-            font-size: 1rem; 
-            color: #eee; 
-            margin: 30px 0; 
-            line-height: 1.8;
-            letter-spacing: 1px;
-        }
-
-        /* 結局文本內部的特殊樣式 */
+        #end-desc { text-align: left; font-size: 1rem; color: #eee; margin: 25px 0; line-height: 1.8; }
         .sylus-quote { color: #fff; font-weight: bold; border-left: 2px solid var(--qin-color); padding-left: 10px; display: block; margin: 10px 0; }
         .story-narrative { color: var(--narration); font-style: italic; display: block; }
-
-        .btn-group { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
-        .action-btn { background: var(--qin-color); color: white; border: none; padding: 14px 30px; cursor: pointer; font-weight: bold; width: 100%; text-decoration: none; display: inline-block; font-size: 1rem; letter-spacing: 2px; transition: 0.3s; }
-        .action-btn:hover { filter: brightness(1.2); transform: translateY(-2px); }
-        .gallery-btn { background: transparent; border: 1px solid var(--accent); color: var(--accent); }
-        .gallery-btn:hover { background: var(--accent); color: #000; }
-        
+        .action-btn { background: var(--qin-color); color: white; border: none; padding: 14px 30px; cursor: pointer; font-weight: bold; width: 100%; text-decoration: none; display: inline-block; font-size: 1rem; letter-spacing: 2px; }
+        .gallery-btn { background: transparent; border: 1px solid var(--accent); color: var(--accent); margin-bottom: 10px; }
         .hidden { display: none !important; }
         .name-input { width: 100%; padding: 12px; margin: 15px 0; background: #1a1a1a; border: 1px solid #444; color: white; text-align: center; font-size: 1rem; }
     </style>
@@ -153,19 +200,16 @@
     <!-- 結局彈窗 -->
     <div id="end-screen" class="modal-overlay hidden">
         <div id="end-window" class="modal-window">
-            <h2 id="end-title"></h2>
+            <h2 id="end-title" style="color:var(--accent); letter-spacing:2px;"></h2>
             <div id="end-desc"></div>
-            
-            <div class="btn-group">
-                <a id="gallery-link" href="#" class="action-btn gallery-btn hidden">進入結局</a>
-                <button class="action-btn" onclick="startNewRound()">繼續遊戲</button>
-            </div>
-            
-            <div id="loss-count-ui" style="font-size:0.7rem; color:#444; margin-top:15px; letter-spacing: 1px;"></div>
+            <a id="gallery-link" href="#" class="action-btn gallery-btn hidden">進入結局</a>
+            <button class="action-btn" onclick="startNewRound()">繼續遊戲</button>
+            <div id="loss-count-ui" style="font-size:0.7rem; color:#444; margin-top:10px;"></div>
         </div>
     </div>
 
     <div class="main-container">
+        <!-- 秦徹區域 -->
         <div class="qin-section">
             <div class="qin-portrait-frame">
                 <img id="qin-img" class="qin-image" src="" alt="">
@@ -176,6 +220,7 @@
             </div>
         </div>
 
+        <!-- 遊戲區域 -->
         <div class="game-section">
             <div class="status-bar">
                 <div id="p1-badge" class="player-badge active">小狸花</div>
@@ -193,20 +238,20 @@
         const CARD_BACK_IMG = "assets/card_back.jpg"; 
 
         const QIN_EXPRESSIONS = {
-            "normal":   { img: "https://via.placeholder.com/300x450?text=Qin_Normal", msg: "該妳了。別發呆，我沒這麼多耐心。" },
-            "thinking": { img: "https://via.placeholder.com/300x450?text=Qin_Thinking", msg: "讓我想想...隱藏在這些牌後面的，會是什麼？" },
-            "match":    { img: "https://via.placeholder.com/300x450?text=Qin_Match", msg: "這對牌我就收下了。" },
-            "fail":     { img: "https://via.placeholder.com/300x450?text=Qin_Fail", msg: "嘖，記錯位置了嗎？有趣。" },
-            "win":      { img: "https://via.placeholder.com/300x450?text=Qin_Win", msg: "勝負已分。" },
-            "lose":     { img: "https://via.placeholder.com/300x450?text=Qin_Lose", msg: "不錯。" },
-            "punish":   { img: "https://via.placeholder.com/300x450?text=Qin_Punish", msg: "連續五次了..." }
+            "normal":   { img: "assets/qin_normal.webp", msg: "該妳了。別發呆，我沒這麼多耐心。" },
+            "thinking": { img: "assets/qin_thinking.webp", msg: "讓我想想...隱藏在這些牌後面的，會是什麼？" },
+            "match":    { img: "assets/qin_match.webp", msg: "這對牌我就收下了。" },
+            "fail":     { img: "assets/qin_fail.webp", msg: "嘖，記錯位置了嗎？有趣。" },
+            "win":      { img: "assets/qin_win.webp", msg: "勝負已分。" },
+            "lose":     { img: "assets/qin_lose.webp", msg: "不錯。" },
+            "punish":   { img: "assets/qin_punish.webp", msg: "連續五次了..." }
         };
 
         const CARD_TYPES = {
-            "梅菲斯特":   "assets/crow.png",
+            "梅菲斯特": "assets/crow.png",
             "薛明": "assets/luke.png",
             "薛影": "assets/silas.png",
-            "槍":   "assets/gun.png",
+            "槍": "assets/gun.png",
             "寶石": "assets/gem.png",
             "紅酒": "assets/wine.png"
         };
@@ -216,7 +261,7 @@
             system_match: ["看來我的運氣也不差。", "這對我就收下了。", "不費吹灰之力。"],
             player_fail:  ["記錯位置了嗎？有趣。", "妳的專注力跑哪去了？", "看來妳還需要多觀察。"],
             system_fail:  ["嘖，手感不對。", "看走眼了嗎？沒關係。", "給妳一個追上的機會。"],
-            player_waiting: ["別讓我等太久，我可能會無聊。", "慢慢來，看妳糾結也是種樂趣。", "這麼難記嗎？還是妳在看別的地方？"],
+            player_waiting: ["別讓我等太久。", "慢慢來，看妳糾結也是種樂趣。", "這麼難記嗎？"],
             system_waiting: ["輪到我了？那我就不客氣了。", "看好了，這才是正確的博弈方式。", "既然妳找不到，那我就替妳收下了。"]
         };
 
@@ -242,7 +287,7 @@
             if (nameInput.value.trim()) playerName = nameInput.value.trim();
             document.getElementById('p1-badge').innerText = playerName;
             const startBtn = document.getElementById('start-btn');
-            startBtn.disabled = true; startBtn.innerText = "讀取資源中...";
+            startBtn.disabled = true; startBtn.innerText = "讀取中...";
             await preloadResources();
             document.getElementById('setup-screen').classList.add('hidden');
             startNewRound();
@@ -251,14 +296,14 @@
         function startNewRound() {
             document.getElementById('end-screen').classList.add('hidden');
             if (targetPool.length === 0) targetPool = Object.keys(CARD_TYPES);
-            const randomIndex = Math.floor(Math.random() * targetPool.length);
-            currentTarget = targetPool.splice(randomIndex, 1)[0];
+            const rIdx = Math.floor(Math.random() * targetPool.length);
+            currentTarget = targetPool.splice(rIdx, 1)[0];
             document.getElementById('target-name').innerText = currentTarget;
             document.getElementById('target-icon').src = CARD_TYPES[currentTarget];
 
-            const cardData = [...Object.keys(CARD_TYPES), ...Object.keys(CARD_TYPES)].sort(() => Math.random() - 0.5);
             const grid = document.getElementById('grid');
             grid.innerHTML = '';
+            const cardData = [...Object.keys(CARD_TYPES), ...Object.keys(CARD_TYPES)].sort(() => Math.random() - 0.5);
             cardData.forEach((type, i) => {
                 const card = document.createElement('div');
                 card.className = 'card'; card.dataset.type = type; card.dataset.index = i;
@@ -269,16 +314,13 @@
 
             currentPlayer = Math.random() < 0.5 ? 1 : 2;
             flippedCards = []; qinMemory = {};
-            
             if (currentPlayer === 2) {
                 isLocked = true; updateTurnUI();
-                const waitMsg = DIALOGUES.system_waiting[Math.floor(Math.random() * 3)];
-                setQinState("thinking", waitMsg);
-                setTimeout(qinAIAction, 2500); 
+                setQinState("thinking", DIALOGUES.system_waiting[Math.floor(Math.random()*3)]);
+                setTimeout(qinAIAction, 2000);
             } else {
                 isLocked = false; updateTurnUI();
-                const waitMsg = DIALOGUES.player_waiting[Math.floor(Math.random() * 3)];
-                setQinState("normal", waitMsg);
+                setQinState("normal", DIALOGUES.player_waiting[Math.floor(Math.random()*3)]);
             }
         }
 
@@ -294,35 +336,18 @@
             const isMatch = c1.dataset.type === c2.dataset.type;
 
             if (isMatch) {
-                if (c1.dataset.type === currentTarget) {
-                    processEndingSequence(currentPlayer);
-                    return;
-                }
-                const poolKey = currentPlayer === 1 ? 'player_match' : 'system_match';
-                const msgs = DIALOGUES[poolKey];
-                const randMsg = msgs[Math.floor(Math.random() * msgs.length)];
-                
-                setQinState(currentPlayer === 2 ? "match" : "normal", randMsg);
+                if (c1.dataset.type === currentTarget) { processEndingSequence(currentPlayer); return; }
+                const msgs = DIALOGUES[currentPlayer === 1 ? 'player_match' : 'system_match'];
+                setQinState(currentPlayer === 2 ? "match" : "normal", msgs[Math.floor(Math.random() * msgs.length)]);
                 if (currentPlayer === 2) {
                     document.getElementById('qin-img').classList.add('shake');
                     setTimeout(() => document.getElementById('qin-img').classList.remove('shake'), 500);
                 }
-
-                setTimeout(() => {
-                    flippedCards = []; switchTurn();
-                }, 1500);
+                setTimeout(() => { flippedCards = []; switchTurn(); }, 1500);
             } else {
-                const poolKey = currentPlayer === 1 ? 'player_fail' : 'system_fail';
-                const msgs = DIALOGUES[poolKey];
-                const randMsg = msgs[Math.floor(Math.random() * msgs.length)];
-                
-                setQinState(currentPlayer === 2 ? "fail" : "normal", randMsg);
-
-                setTimeout(() => {
-                    c1.classList.remove('flipped');
-                    c2.classList.remove('flipped');
-                    flippedCards = []; switchTurn();
-                }, 1200);
+                const msgs = DIALOGUES[currentPlayer === 1 ? 'player_fail' : 'system_fail'];
+                setQinState(currentPlayer === 2 ? "fail" : "normal", msgs[Math.floor(Math.random() * msgs.length)]);
+                setTimeout(() => { c1.classList.remove('flipped'); c2.classList.remove('flipped'); flippedCards = []; switchTurn(); }, 1200);
             }
         }
 
@@ -330,14 +355,10 @@
             currentPlayer = (currentPlayer === 1) ? 2 : 1;
             updateTurnUI();
             if (currentPlayer === 2) { 
-                isLocked = true; 
-                const waitMsg = DIALOGUES.system_waiting[Math.floor(Math.random() * 3)];
-                setQinState("thinking", waitMsg);
+                isLocked = true; setQinState("thinking", DIALOGUES.system_waiting[Math.floor(Math.random()*3)]);
                 setTimeout(qinAIAction, 1500);
             } else { 
-                isLocked = false; 
-                const waitMsg = DIALOGUES.player_waiting[Math.floor(Math.random() * 3)];
-                setQinState("normal", waitMsg);
+                isLocked = false; setQinState("normal", DIALOGUES.player_waiting[Math.floor(Math.random()*3)]);
             }
         }
 
@@ -346,104 +367,58 @@
             const hidden = [...cards].filter(c => !c.classList.contains('flipped')).map(c => parseInt(c.dataset.index));
             if (hidden.length === 0) return;
             const inMem = Object.keys(qinMemory).filter(idx => qinMemory[idx] === currentTarget && hidden.includes(parseInt(idx)));
-            
             let p1, p2;
             if (inMem.length >= 2) { p1 = inMem[0]; p2 = inMem[1]; }
             else {
                 p1 = hidden[Math.floor(Math.random() * hidden.length)];
                 handleFlip(cards[p1]);
                 setTimeout(() => {
-                    const matchIdx = Object.keys(qinMemory).find(idx => qinMemory[idx] === cards[p1].dataset.type && idx != p1 && hidden.includes(parseInt(idx)));
-                    p2 = matchIdx || hidden.filter(i => i != p1)[Math.floor(Math.random() * (hidden.length - 1))];
+                    const match = Object.keys(qinMemory).find(idx => qinMemory[idx] === cards[p1].dataset.type && idx != p1 && hidden.includes(parseInt(idx)));
+                    p2 = match || hidden.filter(i => i != p1)[Math.floor(Math.random() * (hidden.length - 1))];
                     handleFlip(cards[p2]);
                 }, 1000);
                 return;
             }
-            handleFlip(cards[p1]); 
-            setTimeout(() => handleFlip(cards[p2]), 1000);
+            handleFlip(cards[p1]); setTimeout(() => handleFlip(cards[p2]), 1000);
         }
 
         function processEndingSequence(winner) {
-            let reactionMsg = ""; let title = ""; let story = ""; let qinState = ""; let url = "";
+            let reaction = ""; let title = ""; let story = ""; let state = ""; let url = "";
             if (winner === 1) {
-                consecutiveLosses = 0; qinState = "lose";
-                reactionMsg = "勝負已分。看來是我低估妳了。";
+                consecutiveLosses = 0; state = "lose";
+                reaction = "勝負已分。看來是我低估妳了。";
                 switch(currentTarget) {
-                    case "梅菲斯特": 
-                        title = "結局：梅菲斯特的禮物"; 
-                        story = `<span class="story-narrative">妳成功拿到了梅菲斯特。秦徹注視著妳，眼神中帶著一絲激賞：</span>
-                                <span class="sylus-quote">『這顆寶石梅菲斯覬覦已久，現在歸妳了。就當作是妳贏得的獎勵。』</span>
-                                <span class="story-narrative">遠處傳來梅菲斯特不滿的鳴叫：『嘎！！』</span>`; 
-                        break;
-                    case "薛明": 
-                        title = "結局：銘謝惠顧"; 
-                        story = `<span class="story-narrative">妳翻開卡牌，裡面掉出一張薛明留下的字條：『銘謝惠顧，下次再來。』</span>
-                                <span class="sylus-quote">『薛明那小子的把戲...看來妳今天的運氣都花在記憶力上了。不過，這局妳確實贏了。』</span>`; 
-                        break;
-                    case "薛影": 
-                        title = "結局：再來一次"; 
-                        story = `<span class="story-narrative">妳翻開了薛影的卡牌，背面凌亂的字跡寫著：『再來一次』。</span>
-                                <span class="sylus-quote">『既然薛影都這麼說了，還要繼續嗎？隨時奉陪。』</span>`; 
-                        break;
-                    case "槍": 
-                        title = "結局：火力升級"; 
-                        story = `<span class="story-narrative">獲得了N109最新型號的手槍。秦徹優雅地靠在椅背上，盯著妳擺弄武器的模樣：</span>
-                                <span class="sylus-quote">『挺適合妳，這樣它就有了價值。把它收好，下次見面時別對準我。』</span>`; 
-                        break;
-                    case "紅酒": 
-                        title = "結局：勝利的慶典"; 
-                        story = `<span class="story-narrative">秦徹開啟瓶塞，紅寶石般的液體注入杯中。他舉杯致意：</span>
-                                <span class="sylus-quote">『這是一支年份極佳的收藏，味道醇厚，就如同這場精彩的對決。為妳的勝利乾杯，${playerName}。』</span>`; 
-                        break;
-                    case "寶石": 
-                        title = "結局 A：贏得博弈"; 
-                        story = `<span class="story-narrative">妳拿到了最珍貴的寶石。秦徹願賭服輸，緩緩將這枚象徵權利的物品推向妳：</span>
-                                <span class="sylus-quote">『願賭服輸，接下來妳想做什麼都可以。妳贏得了我的所有權。』</span>`; 
-                        url = "win_album.html"; 
-                        break;
-                    default: 
-                        title = "結局：奪取勝利"; 
-                        story = `<span class="story-narrative">妳拿到了「${currentTarget}」。</span>
-                                <span class="sylus-quote">『不錯。在 N109 區，像妳這樣有膽識又聰明的人不多了。』</span>`;
+                    case "梅菲斯特": title = "結局：梅菲斯特的禮物"; story = `<span class="story-narrative">妳成功拿到了梅菲斯特。秦徹注視著妳：</span><span class="sylus-quote">『這顆寶石梅菲斯覬覦已久，現在歸妳了。就當作是妳贏得的獎勵。』</span><span class="story-narrative">遠處傳來梅菲斯特不滿的鳴叫：『嘎！！』</span>`; break;
+                    case "薛明": title = "結局：銘謝惠顧"; story = `<span class="story-narrative">妳翻開卡牌，裡面掉出一張 Luke 留下的字條：『銘謝惠顧，下次再來。』</span><span class="sylus-quote">『那小子的把戲...不過，這局妳確實贏了。』</span>`; break;
+                    case "薛影": title = "結局：再來一次"; story = `<span class="story-narrative">妳翻開了 Silas 的卡牌，背面凌亂的字跡寫著：『再來一次』。</span><span class="sylus-quote">『既然那傢伙都這麼說了，還要繼續嗎？』</span>`; break;
+                    case "槍": title = "結局：火力升級"; story = `<span class="story-narrative">獲得了 N109 最新型號的手槍。秦徹優雅地靠在椅背上：</span><span class="sylus-quote">『挺適合妳，把它收好，下次見面時別對準我。』</span>`; break;
+                    case "紅酒": title = "結局：勝利的慶典"; story = `<span class="story-narrative">秦徹開啟瓶塞，液體注入杯中。他舉杯致意：</span><span class="sylus-quote">『這是一支年份極佳的收藏。為妳的勝利乾杯，${playerName}。』</span>`; break;
+                    case "寶石": title = "結局 A：贏得博弈"; story = `<span class="story-narrative">妳拿到了最珍貴的寶石。秦徹願賭服輸，緩緩將這枚象徵權利的物品推向妳：</span><span class="sylus-quote">『願賭服輸，接下來妳想做什麼都可以。妳贏得了我的所有權。』</span>`; url = "win_album.html"; break;
                 }
             } else {
                 consecutiveLosses++;
                 if (consecutiveLosses >= 5) {
-                    consecutiveLosses = 0; qinState = "punish";
-                    reactionMsg = "第五次了...既然妳學不會，那就換個方式教妳。";
-                    title = "結局 C：懲罰遊戲"; 
-                    story = `<span class="story-narrative">連輸五次...妳是故意的嗎？</span>
-                            <span class="sylus-quote">『既然腦袋記不住，那就用身體來記。我想，妳已經做好覺悟了吧？』</span>
-                            <span class="story-narrative">秦徹緩緩靠近，修長的手指扣住妳的下巴，讓妳無法逃避他的視線。</span>`; 
-                    url = "punish_album.html";
+                    consecutiveLosses = 0; state = "punish";
+                    reaction = "第五次了...換個方式教妳。";
+                    title = "結局 C：懲罰遊戲"; story = `<span class="story-narrative">連輸五次...妳是故意的嗎？</span><span class="sylus-quote">『既然腦袋記不住，那就用身體來記。我想，妳已經做好覺悟了吧？』</span>`; url = "punish_album.html";
                 } else {
-                    qinState = "win"; reactionMsg = "看來，妳對我也並非完全了解。";
-                    title = "結局 B：掌控之中"; 
-                    story = `<span class="story-narrative">最後一張「${currentTarget}」落入秦徹手中。他露出自信的笑意：</span>
-                            <span class="sylus-quote">『太慢了。在我這裡，輸家是要付出代價的，妳應該也有所覺悟了吧？』</span>`; 
-                    url = "lose_album.html";
+                    state = "win"; reaction = "難度不高，娛樂度倒是不錯。";
+                    title = "結局 B：掌控之中"; story = `<span class="story-narrative">最後一張「${currentTarget}」落入秦徹手中。</span><span class="sylus-quote">『太慢了。在我這裡，輸家是要付出代價的。』</span>`; url = "lose_album.html";
                 }
             }
-            
-            setQinState(qinState, reactionMsg);
-            if(qinState === 'punish') document.getElementById('qin-img').classList.add('shake');
-
+            setQinState(state, reaction);
+            if(state === 'punish') document.getElementById('qin-img').classList.add('shake');
             setTimeout(() => {
                 const screen = document.getElementById('end-screen');
-                const winEl = document.getElementById('end-window');
-                const link = document.getElementById('gallery-link');
-                const descContainer = document.getElementById('end-desc');
-                
                 document.getElementById('end-title').innerText = title;
-                descContainer.innerHTML = story; // 使用 innerHTML 呈現格式
-                
-                winEl.classList.toggle('punish', qinState === "punish");
+                document.getElementById('end-desc').innerHTML = story;
+                const link = document.getElementById('gallery-link');
                 if (url) { link.classList.remove('hidden'); link.href = url; } else { link.classList.add('hidden'); }
                 document.getElementById('loss-count-ui').innerText = `連敗計數：${localStorage.getItem('qin_consecutive_losses') || 0} / 5`;
+                document.getElementById('end-window').classList.toggle('punish', state === "punish");
                 screen.classList.remove('hidden');
                 document.getElementById('qin-img').classList.remove('shake');
-            }, 4000); 
-
+            }, 3000);
             localStorage.setItem('qin_consecutive_losses', consecutiveLosses);
         }
 
@@ -452,13 +427,13 @@
             document.getElementById('qin-badge').classList.toggle('active', currentPlayer === 2);
         }
 
-        function setQinState(stateKey, customMsg = null) {
-            const data = QIN_EXPRESSIONS[stateKey];
+        function setQinState(key, msg = null) {
+            const data = QIN_EXPRESSIONS[key];
             const img = document.getElementById('qin-img');
             img.style.opacity = 0;
             setTimeout(() => {
                 img.src = data.img;
-                document.getElementById('qin-text').innerText = customMsg || data.msg;
+                document.getElementById('qin-text').innerText = msg || data.msg;
                 img.style.opacity = 1;
             }, 300);
         }
