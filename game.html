@@ -13,6 +13,7 @@
             --accent: #ffd32a;
             --punish-color: #9c1c1c;
             --text: #ffffff;
+            --narration: #aaa; /* 敘述文字顏色 */
         }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { background-color: var(--bg-color); color: var(--text); font-family: "Microsoft JhengHei", sans-serif; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow-x: hidden; touch-action: manipulation; }
@@ -43,8 +44,7 @@
         .qin-image {
             width: 100%; height: 100%;
             object-fit: contain;
-            transition: opacity 0.5s ease-in-out;
-            /* 呼吸起動畫 */
+            transition: opacity 0.6s ease-in-out;
             animation: qinBreathing 4s ease-in-out infinite;
         }
 
@@ -53,7 +53,6 @@
             50% { transform: translateY(-10px) scale(1.02); }
         }
 
-        /* 成功或懲罰時的震動效果 */
         .shake { animation: qinShake 0.5s cubic-bezier(.36,.07,.19,.97) both; }
         @keyframes qinShake {
             10%, 90% { transform: translate3d(-2px, 0, 0); }
@@ -69,7 +68,7 @@
         .game-section { flex: 1; display: flex; flex-direction: column; align-items: center; width: 100%; }
         .status-bar { width: 100%; max-width: 500px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .player-badge { font-size: 0.9rem; padding: 8px 12px; opacity: 0.2; transition: 0.4s; font-weight: bold; border-bottom: 2px solid transparent; }
-        .player-badge.active { opacity: 1; border-bottom-color: white; }
+        .player-badge.active { opacity: 1; border-bottom: white 2px solid; }
 
         .target-card { background: #000; border: 2px solid var(--accent); padding: 10px; text-align: center; border-radius: 12px; box-shadow: 0 0 15px rgba(255, 211, 42, 0.3); width: 115px; animation: pulse 2s infinite; }
         .target-icon { width: 65px; height: 65px; object-fit: contain; }
@@ -84,14 +83,59 @@
         .card-front { background: #fff; transform: rotateY(180deg); border: 2px solid #fff; }
         .card-front img { width: 85%; height: 85%; object-fit: contain; }
 
-        /* 結局視窗樣式 */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); display: flex; align-items: center; justify-content: center; z-index: 2000; padding: 20px; }
-        .modal-window { background: #111; padding: 30px; border-top: 4px solid var(--qin-color); text-align: center; width: 100%; max-width: 450px; box-shadow: 0 10px 50px rgba(0,0,0,0.8); }
-        .modal-window.punish { border-color: var(--punish-color); box-shadow: 0 0 30px var(--punish-color); }
-        .action-btn { background: var(--qin-color); color: white; border: none; padding: 12px 30px; cursor: pointer; font-weight: bold; width: 100%; text-decoration: none; display: inline-block; margin-top: 10px; font-size: 1rem; letter-spacing: 2px; }
+        /* --- 結局視窗美化區 --- */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.92); display: flex; align-items: center; justify-content: center; z-index: 2000; padding: 20px; }
+        
+        .modal-window { 
+            background: linear-gradient(145deg, #111 0%, #050508 100%);
+            padding: 40px; 
+            border-top: 4px solid var(--qin-color); 
+            text-align: center; 
+            width: 100%;
+            max-width: 480px; 
+            box-shadow: 0 15px 60px rgba(0,0,0,1); 
+            border-radius: 2px;
+        }
+        
+        .modal-window.punish { border-color: var(--punish-color); box-shadow: 0 0 40px var(--punish-color); }
+
+        #end-title { 
+            color: var(--accent); 
+            letter-spacing: 4px; 
+            margin-bottom: 25px; 
+            font-size: 1.6rem;
+            position: relative;
+            display: inline-block;
+        }
+        #end-title::after {
+            content: "";
+            position: absolute;
+            bottom: -8px; left: 10%; width: 80%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+        }
+
+        #end-desc { 
+            text-align: left; 
+            font-size: 1rem; 
+            color: #eee; 
+            margin: 30px 0; 
+            line-height: 1.8;
+            letter-spacing: 1px;
+        }
+
+        /* 結局文本內部的特殊樣式 */
+        .sylus-quote { color: #fff; font-weight: bold; border-left: 2px solid var(--qin-color); padding-left: 10px; display: block; margin: 10px 0; }
+        .story-narrative { color: var(--narration); font-style: italic; display: block; }
+
+        .btn-group { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
+        .action-btn { background: var(--qin-color); color: white; border: none; padding: 14px 30px; cursor: pointer; font-weight: bold; width: 100%; text-decoration: none; display: inline-block; font-size: 1rem; letter-spacing: 2px; transition: 0.3s; }
+        .action-btn:hover { filter: brightness(1.2); transform: translateY(-2px); }
         .gallery-btn { background: transparent; border: 1px solid var(--accent); color: var(--accent); }
+        .gallery-btn:hover { background: var(--accent); color: #000; }
+        
         .hidden { display: none !important; }
-        .name-input { width: 100%; padding: 12px; margin: 15px 0; background: #222; border: 1px solid #444; color: white; text-align: center; font-size: 1rem; }
+        .name-input { width: 100%; padding: 12px; margin: 15px 0; background: #1a1a1a; border: 1px solid #444; color: white; text-align: center; font-size: 1rem; }
     </style>
 </head>
 <body>
@@ -110,10 +154,14 @@
     <div id="end-screen" class="modal-overlay hidden">
         <div id="end-window" class="modal-window">
             <h2 id="end-title"></h2>
-            <p id="end-desc" style="text-align: left; font-size: 0.95rem; color: #eee; margin: 20px 0; line-height: 1.8;"></p>
-            <a id="gallery-link" href="#" class="action-btn gallery-btn hidden">進入結局</a>
-            <button class="action-btn" onclick="startNewRound()">繼續博弈</button>
-            <div id="loss-count-ui" style="font-size:0.7rem; color:#555; margin-top:10px;"></div>
+            <div id="end-desc"></div>
+            
+            <div class="btn-group">
+                <a id="gallery-link" href="#" class="action-btn gallery-btn hidden">進入結局</a>
+                <button class="action-btn" onclick="startNewRound()">繼續遊戲</button>
+            </div>
+            
+            <div id="loss-count-ui" style="font-size:0.7rem; color:#444; margin-top:15px; letter-spacing: 1px;"></div>
         </div>
     </div>
 
@@ -137,12 +185,11 @@
                 </div>
                 <div id="qin-badge" class="player-badge" style="color: var(--qin-color);">秦徹</div>
             </div>
-            <div class="grid" id="grid"></div>
+            <div id="grid" class="grid"></div>
         </div>
     </div>
 
     <script>
-        // --- 配置區 ---
         const CARD_BACK_IMG = "assets/card_back.jpg"; 
 
         const QIN_EXPRESSIONS = {
@@ -164,6 +211,15 @@
             "紅酒": "assets/wine.png"
         };
 
+        const DIALOGUES = {
+            player_match: ["運氣不錯，被妳湊到了一對。", "記憶力挺好，這組歸妳了。", "嘖，被妳發現了。"],
+            system_match: ["看來我的運氣也不差。", "這對我就收下了。", "不費吹灰之力。"],
+            player_fail:  ["記錯位置了嗎？有趣。", "妳的專注力跑哪去了？", "看來妳還需要多觀察。"],
+            system_fail:  ["嘖，手感不對。", "看走眼了嗎？沒關係。", "給妳一個追上的機會。"],
+            player_waiting: ["別讓我等太久，我可能會無聊。", "慢慢來，看妳糾結也是種樂趣。", "這麼難記嗎？還是妳在看別的地方？"],
+            system_waiting: ["輪到我了？那我就不客氣了。", "看好了，這才是正確的博弈方式。", "既然妳找不到，那我就替妳收下了。"]
+        };
+
         let targetPool = Object.keys(CARD_TYPES);
         let currentTarget = "";
         let playerName = "小狸花";
@@ -173,7 +229,6 @@
         let qinMemory = {};
         let consecutiveLosses = parseInt(localStorage.getItem('qin_consecutive_losses')) || 0;
 
-        // --- 資源預載 ---
         async function preloadResources() {
             const urls = [CARD_BACK_IMG, ...Object.values(QIN_EXPRESSIONS).map(e => e.img), ...Object.values(CARD_TYPES)];
             const promises = urls.map(url => new Promise(resolve => {
@@ -183,14 +238,12 @@
         }
 
         async function initGame() {
-            const startBtn = document.getElementById('start-btn');
             const nameInput = document.getElementById('p-name-input');
             if (nameInput.value.trim()) playerName = nameInput.value.trim();
             document.getElementById('p1-badge').innerText = playerName;
-            
+            const startBtn = document.getElementById('start-btn');
             startBtn.disabled = true; startBtn.innerText = "讀取資源中...";
             await preloadResources();
-            
             document.getElementById('setup-screen').classList.add('hidden');
             startNewRound();
         }
@@ -209,23 +262,23 @@
             cardData.forEach((type, i) => {
                 const card = document.createElement('div');
                 card.className = 'card'; card.dataset.type = type; card.dataset.index = i;
-                card.innerHTML = `
-                    <div class="card-face card-back" style="background-image: url('${CARD_BACK_IMG}')"></div>
-                    <div class="card-face card-front"><img src="${CARD_TYPES[type]}"></div>
-                `;
+                card.innerHTML = `<div class="card-face card-back" style="background-image: url('${CARD_BACK_IMG}')"></div><div class="card-face card-front"><img src="${CARD_TYPES[type]}"></div>`;
                 card.onclick = () => { if(!isLocked && currentPlayer === 1 && !card.classList.contains('flipped')) handleFlip(card); };
                 grid.appendChild(card);
             });
 
             currentPlayer = Math.random() < 0.5 ? 1 : 2;
             flippedCards = []; qinMemory = {};
+            
             if (currentPlayer === 2) {
                 isLocked = true; updateTurnUI();
-                setQinState("thinking", "這局由我先行。看清楚了...");
-                setTimeout(qinAIAction, 2000);
+                const waitMsg = DIALOGUES.system_waiting[Math.floor(Math.random() * 3)];
+                setQinState("thinking", waitMsg);
+                setTimeout(qinAIAction, 2500); 
             } else {
                 isLocked = false; updateTurnUI();
-                setQinState("normal", `${playerName}，妳先。`);
+                const waitMsg = DIALOGUES.player_waiting[Math.floor(Math.random() * 3)];
+                setQinState("normal", waitMsg);
             }
         }
 
@@ -233,37 +286,59 @@
             card.classList.add('flipped');
             flippedCards.push(card);
             qinMemory[card.dataset.index] = card.dataset.type;
-            if (flippedCards.length === 2) { isLocked = true; setTimeout(checkMatch, 800); }
+            if (flippedCards.length === 2) { isLocked = true; setTimeout(checkMatch, 1000); }
         }
 
         function checkMatch() {
             const [c1, c2] = flippedCards;
-            if (c1.dataset.type === c2.dataset.type) {
+            const isMatch = c1.dataset.type === c2.dataset.type;
+
+            if (isMatch) {
                 if (c1.dataset.type === currentTarget) {
                     processEndingSequence(currentPlayer);
                     return;
                 }
+                const poolKey = currentPlayer === 1 ? 'player_match' : 'system_match';
+                const msgs = DIALOGUES[poolKey];
+                const randMsg = msgs[Math.floor(Math.random() * msgs.length)];
+                
+                setQinState(currentPlayer === 2 ? "match" : "normal", randMsg);
                 if (currentPlayer === 2) {
-                    setQinState("match");
                     document.getElementById('qin-img').classList.add('shake');
                     setTimeout(() => document.getElementById('qin-img').classList.remove('shake'), 500);
                 }
-                flippedCards = []; switchTurn();
+
+                setTimeout(() => {
+                    flippedCards = []; switchTurn();
+                }, 1500);
             } else {
-                if (currentPlayer === 2) setQinState("fail");
+                const poolKey = currentPlayer === 1 ? 'player_fail' : 'system_fail';
+                const msgs = DIALOGUES[poolKey];
+                const randMsg = msgs[Math.floor(Math.random() * msgs.length)];
+                
+                setQinState(currentPlayer === 2 ? "fail" : "normal", randMsg);
+
                 setTimeout(() => {
                     c1.classList.remove('flipped');
                     c2.classList.remove('flipped');
                     flippedCards = []; switchTurn();
-                }, 500);
+                }, 1200);
             }
         }
 
         function switchTurn() {
             currentPlayer = (currentPlayer === 1) ? 2 : 1;
             updateTurnUI();
-            if (currentPlayer === 2) { isLocked = true; setQinState("thinking"); setTimeout(qinAIAction, 1200); }
-            else { isLocked = false; setQinState("normal"); }
+            if (currentPlayer === 2) { 
+                isLocked = true; 
+                const waitMsg = DIALOGUES.system_waiting[Math.floor(Math.random() * 3)];
+                setQinState("thinking", waitMsg);
+                setTimeout(qinAIAction, 1500);
+            } else { 
+                isLocked = false; 
+                const waitMsg = DIALOGUES.player_waiting[Math.floor(Math.random() * 3)];
+                setQinState("normal", waitMsg);
+            }
         }
 
         function qinAIAction() {
@@ -271,6 +346,7 @@
             const hidden = [...cards].filter(c => !c.classList.contains('flipped')).map(c => parseInt(c.dataset.index));
             if (hidden.length === 0) return;
             const inMem = Object.keys(qinMemory).filter(idx => qinMemory[idx] === currentTarget && hidden.includes(parseInt(idx)));
+            
             let p1, p2;
             if (inMem.length >= 2) { p1 = inMem[0]; p2 = inMem[1]; }
             else {
@@ -280,93 +356,93 @@
                     const matchIdx = Object.keys(qinMemory).find(idx => qinMemory[idx] === cards[p1].dataset.type && idx != p1 && hidden.includes(parseInt(idx)));
                     p2 = matchIdx || hidden.filter(i => i != p1)[Math.floor(Math.random() * (hidden.length - 1))];
                     handleFlip(cards[p2]);
-                }, 800); return;
+                }, 1000);
+                return;
             }
-            handleFlip(cards[p1]); setTimeout(() => handleFlip(cards[p2]), 800);
+            handleFlip(cards[p1]); 
+            setTimeout(() => handleFlip(cards[p2]), 1000);
         }
 
-        // --- 勝負對峙序列：先氣泡對話停留三秒，後彈窗 ---
         function processEndingSequence(winner) {
-            let reactionMsg = ""; 
-            let title = "";       
-            let story = "";       
-            let qinState = "";    
-            let url = "";         
-
+            let reactionMsg = ""; let title = ""; let story = ""; let qinState = ""; let url = "";
             if (winner === 1) {
-                consecutiveLosses = 0;
-                qinState = "lose";
+                consecutiveLosses = 0; qinState = "lose";
                 reactionMsg = "勝負已分。看來是我低估妳了。";
-
                 switch(currentTarget) {
-                    case "梅":
-                        title = "結局：梅菲斯特(原本)的禮物";
-                        story = `${playerName}，妳成功拿到了梅菲斯特。秦徹注視著妳：『這顆寶石梅菲斯覬覦已久，現在歸妳了。就當作是妳贏得的獎勵。』『嘎！！』`;
+                    case "梅菲斯特": 
+                        title = "結局：梅菲斯特的禮物"; 
+                        story = `<span class="story-narrative">妳成功拿到了梅菲斯特。秦徹注視著妳，眼神中帶著一絲激賞：</span>
+                                <span class="sylus-quote">『這顆寶石梅菲斯覬覦已久，現在歸妳了。就當作是妳贏得的獎勵。』</span>
+                                <span class="story-narrative">遠處傳來梅菲斯特不滿的鳴叫：『嘎！！』</span>`; 
                         break;
-                    case "薛明":
-                        title = "結局：銘謝惠顧";
-                        story = `『那小子說，如果抽到他的卡就打開這個』裡面是一張薛明留下的字條：『銘謝惠顧，下次再來。』\n秦徹忍不住露出一絲笑意：『薛明那小子的把戲...不過，這局妳確實贏了。』`;
+                    case "薛明": 
+                        title = "結局：銘謝惠顧"; 
+                        story = `<span class="story-narrative">妳翻開卡牌，裡面掉出一張薛明留下的字條：『銘謝惠顧，下次再來。』</span>
+                                <span class="sylus-quote">『薛明那小子的把戲...看來妳今天的運氣都花在記憶力上了。不過，這局妳確實贏了。』</span>`; 
                         break;
-                    case "薛影":
-                        title = "結局：再來一次";
-                        story = `妳翻開了薛影的卡牌，背面凌亂的字跡寫著：『再來一次』。\n秦徹語氣玩味：『既然薛影都這麼說了，繼續？』`;
+                    case "薛影": 
+                        title = "結局：再來一次"; 
+                        story = `<span class="story-narrative">妳翻開了薛影的卡牌，背面凌亂的字跡寫著：『再來一次』。</span>
+                                <span class="sylus-quote">『既然薛影都這麼說了，還要繼續嗎？隨時奉陪。』</span>`; 
                         break;
-                    case "槍":
-                        title = "結局：火力升級";
-                        story = `獲得了N109最新型號的手槍。秦徹優雅地靠在椅背上，盯著妳玩得不亦樂乎的模樣：『挺適合妳，這樣它就有了價值。』`;
+                    case "槍": 
+                        title = "結局：火力升級"; 
+                        story = `<span class="story-narrative">獲得了N109最新型號的手槍。秦徹優雅地靠在椅背上，盯著妳擺弄武器的模樣：</span>
+                                <span class="sylus-quote">『挺適合妳，這樣它就有了價值。把它收好，下次見面時別對準我。』</span>`; 
                         break;
-                    case "紅酒":
-                        title = "結局：勝利的慶典";
-                        story = `既然用紅酒獲得勝利，也該開一支真實的慶祝。秦徹開啟瓶塞，液體注入杯中。他舉杯致意：『這是一支年份極佳的收藏，為妳的勝利，${playerName}。』`;
+                    case "紅酒": 
+                        title = "結局：勝利的慶典"; 
+                        story = `<span class="story-narrative">秦徹開啟瓶塞，紅寶石般的液體注入杯中。他舉杯致意：</span>
+                                <span class="sylus-quote">『這是一支年份極佳的收藏，味道醇厚，就如同這場精彩的對決。為妳的勝利乾杯，${playerName}。』</span>`; 
                         break;
-                    case "寶石":
-                        title = "結局 A：贏得博弈";
-                        story = `妳拿到了最珍貴的寶石。『願賭服輸，接下來妳想做什麼都可以。』秦徹交出了他個人的所有權。`;
-                        url = "win_album.html";
+                    case "寶石": 
+                        title = "結局 A：贏得博弈"; 
+                        story = `<span class="story-narrative">妳拿到了最珍貴的寶石。秦徹願賭服輸，緩緩將這枚象徵權利的物品推向妳：</span>
+                                <span class="sylus-quote">『願賭服輸，接下來妳想做什麼都可以。妳贏得了我的所有權。』</span>`; 
+                        url = "win_album.html"; 
                         break;
-                    default:
-                        title = "結局：奪取勝利";
-                        story = `妳拿到了「${currentTarget}」。秦徹眼底閃過一絲讚許。`;
+                    default: 
+                        title = "結局：奪取勝利"; 
+                        story = `<span class="story-narrative">妳拿到了「${currentTarget}」。</span>
+                                <span class="sylus-quote">『不錯。在 N109 區，像妳這樣有膽識又聰明的人不多了。』</span>`;
                 }
             } else {
                 consecutiveLosses++;
                 if (consecutiveLosses >= 5) {
-                    consecutiveLosses = 0;
-                    qinState = "punish";
+                    consecutiveLosses = 0; qinState = "punish";
                     reactionMsg = "第五次了...既然妳學不會，那就換個方式教妳。";
-                    title = "結局 C：懲罰遊戲";
-                    story = `連輸五次...${playerName}，妳是故意的嗎？\n秦徹緩緩靠近，扣住妳的下巴：『既然腦袋記不住，那就用身體來記。』`;
+                    title = "結局 C：懲罰遊戲"; 
+                    story = `<span class="story-narrative">連輸五次...妳是故意的嗎？</span>
+                            <span class="sylus-quote">『既然腦袋記不住，那就用身體來記。我想，妳已經做好覺悟了吧？』</span>
+                            <span class="story-narrative">秦徹緩緩靠近，修長的手指扣住妳的下巴，讓妳無法逃避他的視線。</span>`; 
                     url = "punish_album.html";
                 } else {
-                    qinState = "win";
-                    reactionMsg = "看來，妳對我也並非完全了解。";
-                    title = "結局 B：掌控之中";
-                    story = `秦徹拿到了「${currentTarget}」：『太慢了。在我這裡輸家都要付出代價，妳應該也有所覺悟了。』`;
+                    qinState = "win"; reactionMsg = "看來，妳對我也並非完全了解。";
+                    title = "結局 B：掌控之中"; 
+                    story = `<span class="story-narrative">最後一張「${currentTarget}」落入秦徹手中。他露出自信的笑意：</span>
+                            <span class="sylus-quote">『太慢了。在我這裡，輸家是要付出代價的，妳應該也有所覺悟了吧？』</span>`; 
                     url = "lose_album.html";
                 }
             }
-
-            // 1. 觸發反應動畫與氣泡文字
+            
             setQinState(qinState, reactionMsg);
             if(qinState === 'punish') document.getElementById('qin-img').classList.add('shake');
 
-            // 2. 停留三秒後顯示詳細視窗
             setTimeout(() => {
                 const screen = document.getElementById('end-screen');
                 const winEl = document.getElementById('end-window');
                 const link = document.getElementById('gallery-link');
+                const descContainer = document.getElementById('end-desc');
                 
                 document.getElementById('end-title').innerText = title;
-                document.getElementById('end-desc').innerText = story;
-                winEl.classList.toggle('punish', qinState === "punish");
+                descContainer.innerHTML = story; // 使用 innerHTML 呈現格式
                 
-                if (url) { link.classList.remove('hidden'); link.href = url; }
-                else { link.classList.add('hidden'); }
-
-                document.getElementById('loss-count-ui').innerText = `連敗次數：${localStorage.getItem('qin_consecutive_losses') || 0} / 5`;
+                winEl.classList.toggle('punish', qinState === "punish");
+                if (url) { link.classList.remove('hidden'); link.href = url; } else { link.classList.add('hidden'); }
+                document.getElementById('loss-count-ui').innerText = `連敗計數：${localStorage.getItem('qin_consecutive_losses') || 0} / 5`;
                 screen.classList.remove('hidden');
                 document.getElementById('qin-img').classList.remove('shake');
-            }, 3000);
+            }, 4000); 
 
             localStorage.setItem('qin_consecutive_losses', consecutiveLosses);
         }
@@ -384,7 +460,7 @@
                 img.src = data.img;
                 document.getElementById('qin-text').innerText = customMsg || data.msg;
                 img.style.opacity = 1;
-            }, 200);
+            }, 300);
         }
     </script>
 </body>
